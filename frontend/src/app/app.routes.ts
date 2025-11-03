@@ -1,0 +1,55 @@
+import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+import { proProfileGuard } from './core/guards/pro-profile.guard';
+
+
+export const routes: Routes = [
+    // Public
+    { path: '', loadComponent: () => import('./pages/public/home/home.page').then(m => m.HomePage) },
+    { path: 'auth/login', loadComponent: () => import('./pages/auth/login/login.page').then(m => m.LoginPage) },
+    { path: 'auth/register', loadComponent: () => import('./pages/auth/register/register.page').then(m => m.RegisterPage) },
+
+     { path: 'prestataires/:id', loadComponent: () => import('./pages/client/prestataire-detail/prestataire-detail.page')
+      .then(m => m.PrestataireDetailPage) },
+
+    // Client (auth)
+    { path: 'services', loadComponent: () => import('./pages/client/catalogue-services/catalogue-services.page').then(m => m.CatalogueServicesPage) },
+    { path: 'services/:serviceSlug/prestataires', loadComponent: () => import('./pages/client/prestataires-par-service/prestataires-par-service.page').then(m => m.PrestatairesParServicePage) },
+
+    { path: 'rendezvous/nouveau', canMatch: [authGuard], loadComponent: () => import('./pages/client/rendezvous-nouveau/rendezvous-nouveau.page').then(m => m.RendezvousNouveauPage) },
+    { path: 'mon-compte', canMatch: [authGuard], loadComponent: () => import('./pages/client/mon-compte/mon-compte.page').then(m => m.MonComptePage) },
+    { path: 'mon-compte/rendezvous', canMatch: [authGuard], loadComponent: () => import('./pages/client/mes-rendezvous/mes-rendezvous.page').then(m => m.MesRendezvousPage) },
+
+    // Pro
+    {
+        path: 'pro/onboarding', canMatch: [authGuard, roleGuard(['PRO'])],
+        loadComponent: () => import('./pages/pro/onboarding/onboarding.page').then(m => m.OnboardingPage)
+    },
+
+    {
+        path: 'pro', canMatch: [authGuard, roleGuard(['PRO']), proProfileGuard],
+        loadComponent: () => import('./pages/pro/dashboard/dashboard.page').then(m => m.DashboardPage)
+    },
+
+    {
+        path: 'pro/services', canMatch: [authGuard, roleGuard(['PRO']), proProfileGuard],
+        loadComponent: () => import('./pages/pro/services/services.page').then(m => m.ServicesPage)
+    },
+
+    {
+        path: 'pro/disponibilites', canMatch: [authGuard, roleGuard(['PRO']), proProfileGuard],
+        loadComponent: () => import('./pages/pro/disponibilites/disponibilites.page').then(m => m.DisponibilitesPage)
+    },
+
+    {
+        path: 'pro/rendezvous', canMatch: [authGuard, roleGuard(['PRO']), proProfileGuard],
+        loadComponent: () => import('./pages/pro/rendezvous/rendezvous.page').then(m => m.RendezvousPage)
+    },
+
+    // Admin
+    { path: 'admin/services', canMatch: [authGuard, roleGuard(['ADMIN'])], loadComponent: () => import('./pages/admin/services/services.page').then(m => m.AdminServicesPage) },
+    { path: 'admin/monitoring', canMatch: [authGuard, roleGuard(['ADMIN'])], loadComponent: () => import('./pages/admin/monitoring/monitoring.page').then(m => m.MonitoringPage) },
+
+    { path: '**', redirectTo: '' }
+];

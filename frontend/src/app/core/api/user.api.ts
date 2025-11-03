@@ -1,0 +1,45 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs';
+
+export type UserMe = {
+  id: number | string;
+  prenom: string;
+  nom: string;
+  email: string;
+  telephone?: string;
+  roles?: string[];
+};
+
+export type UpdateMePayload = {
+  prenom?: string;
+  nom?: string;
+  telephone?: string;
+  // email non modifiable ici
+};
+
+@Injectable({ providedIn: 'root' })
+export class UserApi {
+  private base = '/api'; // ton proxy redirige /api vers le back
+
+  constructor(private http: HttpClient) {}
+
+  me() {
+    // ton MeController expose GET /me (souvent sous /api/me)
+    return this.http.get<UserMe>(`${this.base}/me`).pipe(
+      map((u: any) => ({
+        id: u.id,
+        prenom: u.prenom ?? '',
+        nom: u.nom ?? '',
+        email: u.email ?? '',
+        telephone: u.telephone ?? '',
+        roles: u.roles ?? [],
+      } as UserMe))
+    );
+  }
+
+  updateMe(body: UpdateMePayload) {
+    // endpoint classique côté back : PUT /api/users/me
+    return this.http.put<UserMe>(`${this.base}/users/me`, body);
+  }
+}
