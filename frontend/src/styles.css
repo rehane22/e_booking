@@ -11,7 +11,7 @@
   --color-muted: #6b7280;
   --color-rose-card: #fdeef4;
   --radius-xl: 1.25rem;
---color-rose-soft: #f7e9f0;
+  --color-rose-soft: #f7e9f0;
 }
 
 /* Utilities custom */
@@ -23,3 +23,7 @@
 /* Variants */
 .btn-primary { @apply btn bg-primary text-white hover:bg-primary-600 active:bg-primary-700; }
 .btn-ghost   { @apply btn bg-white text-primary border border-primary/20 hover:bg-rose-card; }
+.btn-rose-card   { @apply btn bg-primary-700 text-white border border-primary/20 hover:bg-ink; }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

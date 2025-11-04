@@ -12,6 +12,7 @@ public interface DisponibiliteRepository extends JpaRepository<Disponibilite, Lo
 
     List<Disponibilite> findByPrestataireIdAndJourSemaine(Long prestataireId, JourSemaine jour);
 
+    List<Disponibilite> findByJourSemaine(JourSemaine jour);
     /* ---- Vérifier si un horaire est couvert par un créneau (général OU spécifique(serviceId)) ---- */
     @Query("""
            select d from Disponibilite d

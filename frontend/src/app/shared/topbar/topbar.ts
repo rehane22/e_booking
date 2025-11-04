@@ -2,10 +2,11 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 
+
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ],
   template: `
   <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-black/5">
     <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -24,8 +25,9 @@ import { RouterModule, Router } from '@angular/router';
 
           @if (has('CLIENT')) { <button routerLink="/services" class="btn-ghost h-10 px-3">Catalogue</button> }
           @if (has('PRO'))    { <button routerLink="/pro" class="btn-ghost h-10 px-3">Espace Pro</button> }
-          @if (has('ADMIN'))  { <button routerLink="/admin/monitoring" class="btn-ghost h-10 px-3">Admin</button> }
-          <button routerLink="/mon-compte" class="btn-primary h-10 px-4">Mon compte</button>
+          @if (has('ADMIN'))  { <button routerLink="/admin/dashboard" class="btn-ghost h-10 px-3">Admin</button> }
+          <button routerLink="/mon-compte" class="btn-primary h-10 px-4"><mat-icon fontSet="material-icons-outlined">visibility</mat-icon></button>
+          
 
           <button class="btn-primary h-10 px-4" (click)="logout()">Déconnexion</button>
         </nav>

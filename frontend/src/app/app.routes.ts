@@ -47,9 +47,28 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/pro/rendezvous/rendezvous.page').then(m => m.RendezvousPage)
     },
 
-    // Admin
-    { path: 'admin/services', canMatch: [authGuard, roleGuard(['ADMIN'])], loadComponent: () => import('./pages/admin/services/services.page').then(m => m.AdminServicesPage) },
-    { path: 'admin/monitoring', canMatch: [authGuard, roleGuard(['ADMIN'])], loadComponent: () => import('./pages/admin/monitoring/monitoring.page').then(m => m.MonitoringPage) },
-
+     
+   {
+    path: 'admin',
+    canMatch: [authGuard, roleGuard(['ADMIN'])],
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./pages/admin/dashboard/admin-dashboard.page').then(m => m.AdminDashboardPage),
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./pages/admin/users/users-list.page').then(m => m.UsersListPage),
+      },
+      {
+        path: 'users/:id',
+        loadComponent: () =>
+          import('./pages/admin/users/user-detail.page').then(m => m.UserDetailPage),
+      },
+    ],
+  },
     { path: '**', redirectTo: '' }
 ];

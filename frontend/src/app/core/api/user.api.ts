@@ -20,12 +20,12 @@ export type UpdateMePayload = {
 
 @Injectable({ providedIn: 'root' })
 export class UserApi {
-  private base = '/api'; // ton proxy redirige /api vers le back
+  private base = '/api'; 
 
   constructor(private http: HttpClient) {}
 
   me() {
-    // ton MeController expose GET /me (souvent sous /api/me)
+
     return this.http.get<UserMe>(`${this.base}/me`).pipe(
       map((u: any) => ({
         id: u.id,

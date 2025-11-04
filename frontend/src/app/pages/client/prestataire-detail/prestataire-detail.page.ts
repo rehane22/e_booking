@@ -27,10 +27,6 @@ import { RendezVousApi } from '../../../core/api/rendezvous.api';
         <p class="text-sm text-muted">
           @if (specialite) { {{ specialite }} }
         </p>
-        <div class="mt-3 flex flex-wrap gap-2">
-          <a class="btn-ghost h-10" href="#about">À propos</a>
-          <a class="btn-primary h-10" href="#slots">Voir créneaux</a>
-        </div>
       </div>
     </section>
 

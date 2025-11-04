@@ -41,7 +41,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/prestataires/*").permitAll()            // <-- détail prestataire
                         .requestMatchers(HttpMethod.GET, "/disponibilites/*/slots").permitAll()
                         .requestMatchers(HttpMethod.GET, "/disponibilites/*").permitAll()
-                                .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

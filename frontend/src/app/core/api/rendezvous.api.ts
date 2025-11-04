@@ -3,25 +3,14 @@ import { HttpClient } from '@angular/common/http';
 
 export type Rdv = {
   id: string|number;
-  date: string;        // "2025-11-03"
-  heure: string;       // "14:00"
-  //serviceNom: string;
-  //clientNom: string;
+  date: string;      
+  heure: string;      
   prestataireId: number | string;
   clientId: number | string;
   serviceId: number | string;
-  statut: 'EN_ATTENTE'|'CONFIRME'|'ANNULE';
+  statut: 'CONFIRME'|'ANNULE';
 };
 
-/* export type RdvItem = {
-  id: number | string;
-  serviceId: number | string;
-  prestataireId: number | string;
-  clientId: number | string;
-  date: string;   // YYYY-MM-DD
-  heure: string;  // HH:mm:ss ou HH:mm selon ton mapper
-  statut: 'EN_ATTENTE' | 'CONFIRME' | 'ANNULE';
-}; */
 
 export type CreateRdvPayload = {
   serviceId: number | string;

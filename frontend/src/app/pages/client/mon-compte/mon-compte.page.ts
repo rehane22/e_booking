@@ -2,8 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { UserApi, UserMe, UpdateMePayload } from '../../../core/api/user.api';
 import { RendezVousApi, Rdv } from '../../../core/api/rendezvous.api';
+import { UpdateMePayload, UserApi, UserMe } from '../../../core/api/user.api';
 
 @Component({
   standalone: true,
@@ -56,14 +56,16 @@ import { RendezVousApi, Rdv } from '../../../core/api/rendezvous.api';
     </section>
 
     <!-- ======= MES RENDEZ-VOUS ======= -->
-    <section class="card p-6 mt-6">
+ @if (!has('ADMIN')) {
+      <section class="card p-6 mt-6">
       <div class="flex items-center justify-between">
         <h2 class="text-lg font-semibold">Mes rendez-vous</h2>
         <div class="text-sm text-muted">
           @if (rdvs.length) { {{ rdvs.length }} RDV } @else { Aucun RDV }
         </div>
       </div>
-
+  
+   
       <div class="mt-4 grid gap-3">
         @for (r of rdvs; track r.id) {
           <div class="p-4 rounded-xl border flex flex-col md:flex-row md:items-center gap-3">
@@ -73,7 +75,7 @@ import { RendezVousApi, Rdv } from '../../../core/api/rendezvous.api';
                 <span class="text-xs text-muted">(#{{ r.prestataireId }})</span>
               </p>
               <p class="text-xs text-muted">
-                Service #{{ r.serviceId }} · Statut :
+                Statut :
                 <span [ngClass]="statutColor(r.statut)">{{ statutLabel(r.statut) }}</span>
               </p>
             </div>
@@ -102,6 +104,7 @@ import { RendezVousApi, Rdv } from '../../../core/api/rendezvous.api';
         <div class="mt-3 text-sm text-red-600">{{ listError }}</div>
       }
     </section>
+    }
   </div>
   `
 })
@@ -129,6 +132,8 @@ export class MonComptePage implements OnInit {
   }
 
   /* ====== INFOS ====== */
+
+  has(role: string){ try { return (JSON.parse(localStorage.getItem('roles')||'[]') as string[]).includes(role); } catch { return false; } }
   private loadMeAndRdvs() {
     this.saveOk = false;
     this.saveError = '';
@@ -229,7 +234,6 @@ export class MonComptePage implements OnInit {
 
   statutLabel(s: Rdv['statut']) {
     switch (s) {
-      case 'EN_ATTENTE': return 'En attente';
       case 'CONFIRME':   return 'Confirmé';
       case 'ANNULE':     return 'Annulé';
       default:           return s;
@@ -237,7 +241,6 @@ export class MonComptePage implements OnInit {
   }
   statutColor(s: Rdv['statut']) {
     return {
-      'text-amber-600': s === 'EN_ATTENTE',
       'text-emerald-600': s === 'CONFIRME',
       'text-red-600': s === 'ANNULE'
     };

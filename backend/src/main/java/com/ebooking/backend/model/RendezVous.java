@@ -3,8 +3,10 @@ package com.ebooking.backend.model;
 import com.ebooking.backend.model.enums.StatutRdv;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Getter @Setter
@@ -48,4 +50,9 @@ public class RendezVous {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     private StatutRdv statut = StatutRdv.EN_ATTENTE;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
 }

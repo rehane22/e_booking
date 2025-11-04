@@ -79,13 +79,6 @@ type ProCard = {
               <input class="input h-10" placeholder="Nom, ville, spécialité…"
                      [(ngModel)]="proQuery" (ngModelChange)="resetPaging()">
             </div>
-            <div>
-              <label class="text-xs">Trier</label>
-              <select class="input h-10 w-[170px]" [(ngModel)]="sortKey" (ngModelChange)="applySort()">
-                <option value="nomAffiche">Nom</option>
-                <option value="ville">Ville</option>
-              </select>
-            </div>
             <div class="ml-auto">
               <button class="btn-ghost h-10" (click)="clearAll()">Tout effacer</button>
             </div>
