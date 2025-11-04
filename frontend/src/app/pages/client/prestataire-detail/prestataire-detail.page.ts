@@ -241,8 +241,8 @@ export class PrestataireDetailPage implements OnInit {
       next: (resp) => {
         this.loading = false;
         this.successText = 'Réservation créée avec succès. Statut : EN_ATTENTE.';
-        // Optionnel: redirection vers /mon-compte/rendezvous
-        // this.router.navigate(['/mon-compte/rendezvous']);
+      
+        this.router.navigate(['/mon-compte']);
       },
       error: (err) => {
         this.loading = false;

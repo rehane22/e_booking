@@ -15,12 +15,10 @@ export const routes: Routes = [
 
     // Client (auth)
     { path: 'services', loadComponent: () => import('./pages/client/catalogue-services/catalogue-services.page').then(m => m.CatalogueServicesPage) },
-    { path: 'services/:serviceSlug/prestataires', loadComponent: () => import('./pages/client/prestataires-par-service/prestataires-par-service.page').then(m => m.PrestatairesParServicePage) },
-
+ 
     { path: 'rendezvous/nouveau', canMatch: [authGuard], loadComponent: () => import('./pages/client/rendezvous-nouveau/rendezvous-nouveau.page').then(m => m.RendezvousNouveauPage) },
     { path: 'mon-compte', canMatch: [authGuard], loadComponent: () => import('./pages/client/mon-compte/mon-compte.page').then(m => m.MonComptePage) },
-    { path: 'mon-compte/rendezvous', canMatch: [authGuard], loadComponent: () => import('./pages/client/mes-rendezvous/mes-rendezvous.page').then(m => m.MesRendezvousPage) },
-
+  
     // Pro
     {
         path: 'pro/onboarding', canMatch: [authGuard, roleGuard(['PRO'])],

@@ -1,26 +1,83 @@
-<section class="relative overflow-hidden">
-  <div class="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent"></div>
-  <div class="relative max-w-6xl mx-auto px-6 pt-12 pb-10">
-    <div class="grid md:grid-cols-2 gap-10 items-center">
-      <div>
-        <h1 class="text-4xl font-bold leading-tight">
-          Réserve tes prestations <span class="text-primary">en quelques clics</span>
-        </h1>
-        <p class="text-base text-muted mt-4">
-          Esthétique, coiffure, onglerie, santé — tout au même endroit.
-        </p>
-        <div class="mt-6 flex flex-wrap gap-3">
-          <button routerLink="/auth/login" class="btn-primary h-12 px-6">Se connecter</button>
-          <button routerLink="/auth/register" class="btn-ghost h-12 px-6">Créer un compte</button>
-          @if (isLoggedIn()) { <button routerLink="/services" class="btn-ghost h-12 px-6">Ouvrir le catalogue</button> }
-        </div>
-      </div>
+<div class="relative overflow-hidden">
+    <!-- HERO -->
+    <section class="pt-12 pb-16 md:pt-16 md:pb-24">
+      <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+            Réservez vos prestations beauté
+            <span class="text-primary">simplement</span>.
+          </h1>
+          <p class="mt-4 text-lg text-muted">
+            Onglerie, coiffure, maquillage… Comparez les prestataires, voyez les créneaux en direct et réservez en quelques clics.
+          </p>
 
-      <div class="hidden md:block">
-        <div class="card p-6 h-[280px] grid place-items-center text-muted">
-          Aperçu : catalogue, pros, créneaux…
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a class="btn-primary h-11 px-6" >Découvrir le catalogue</a>
+            <a class="btn-ghost h-11 px-6" routerLink="/signup">Créer un compte</a>
+          </div>
+
+          <div class="mt-8 flex items-center gap-6 text-sm text-muted">
+            <div><b class="text-ink">+200</b> prestataires</div>
+            <div><b class="text-ink">RDV</b> confirmés en temps réel</div>
+            <div><b class="text-ink">Paiement</b> sécurisé</div>
+          </div>
+        </div>
+
+        <div class="relative">
+          <div class="rounded-2xl border bg-white shadow-sm p-5">
+            <div class="flex items-center gap-4">
+              <div class="h-16 w-16 rounded-xl bg-gradient-to-br from-primary to-primary-600"></div>
+              <div>
+                <p class="font-semibold">By_Rehanails</p>
+                <p class="text-sm text-muted">Onglerie · Paris</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mt-5">
+              <div class="h-24 rounded-xl bg-rose-card"></div>
+              <div class="h-24 rounded-xl bg-rose-card"></div>
+              <div class="h-24 rounded-xl bg-rose-card"></div>
+            </div>
+  
+          </div>
+          <!-- Accent gradient -->
+          <div class="absolute -z-10 -top-16 -right-16 h-56 w-56 rounded-full blur-3xl opacity-30 bg-primary"></div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="py-12 md:py-16 bg-white/70 rounded-3xl mx-6">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-2xl md:text-3xl font-bold text-center">Pourquoi nous choisir ?</h2>
+        <div class="grid md:grid-cols-3 gap-6 mt-8">
+          <div class="p-5 rounded-2xl border bg-white">
+            <p class="font-semibold">Réservation ultra rapide</p>
+            <p class="text-sm text-muted mt-2">Trouvez votre prestataire, choisissez un créneau, c’est réservé.</p>
+          </div>
+          <div class="p-5 rounded-2xl border bg-white">
+            <p class="font-semibold">Prestataires vérifiés</p>
+            <p class="text-sm text-muted mt-2">Profils complets, avis et spécialités pour choisir en confiance.</p>
+          </div>
+          <div class="p-5 rounded-2xl border bg-white">
+            <p class="font-semibold">Suivi de vos RDV</p>
+            <p class="text-sm text-muted mt-2">Historique, rappels, annulation en 1 clic selon les conditions.</p>
+          </div>
+        </div>
+        <div class="text-center mt-10">
+          <a class="btn-ghost h-11 px-6" routerLink="/services">Parcourir les catégories</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-14">
+      <div class="max-w-6xl mx-auto px-6 rounded-3xl border bg-rose-card/60 p-8 md:p-12 text-center">
+        <h3 class="text-2xl md:text-3xl font-bold">Prête à booker votre prochain look ?</h3>
+        <p class="text-muted mt-2">Créez un compte pour garder vos prestas préférées et réserver plus vite.</p>
+        <div class="mt-6 flex justify-center gap-3">
+          <a class="btn-primary h-11 px-6" routerLink="/signup">Commencer</a>
+          <a class="btn-ghost h-11 px-6" routerLink="/login">J’ai déjà un compte</a>
+        </div>
+      </div>
+    </section>
   </div>
-</section>

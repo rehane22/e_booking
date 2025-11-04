@@ -22,10 +22,16 @@ export class PrestataireApi {
     return this.http.delete<void>(`${this.base}/prestataires/${prestataireId}/services/${serviceId}`);
   }
 
+  /** ✅ Nouveau: lister tous les prestataires (liste publique) */
+  listAll() {
+    return this.http.get<any[]>(`${this.base}/prestataires`);
+  }
+
   listByServiceSlug(serviceSlug: string) {
-  return this.http.get<any[]>(`${this.base}/prestataires`, { params: { serviceSlug } });
-}
-/** Nouveau: liste publique des prestataires par serviceId (ton endpoint listByService) */
+    return this.http.get<any[]>(`${this.base}/prestataires`, { params: { serviceSlug } });
+  }
+
+  /** Liste par serviceId unique */
   listByServiceId(serviceId: string | number) {
     const params = new HttpParams().set('serviceId', String(serviceId));
     return this.http.get<any[]>(`${this.base}/prestataires`, { params });
@@ -44,14 +50,15 @@ export class PrestataireApi {
     );
   }
 
-  /** Nouveau: profil public complet (ton endpoint getPublic) */
+  /** Profil public complet */
   getPublic(prestataireId: string|number) {
     return this.http.get<any>(`${this.base}/prestataires/${prestataireId}`);
   }
 
-   findById(prestataireId: string|number) {
+  findById(prestataireId: string|number) {
     return this.http.get<any>(`${this.base}/prestataires/${prestataireId}`);
   }
+
   findManyByIds(ids: (string|number)[]) {
     if (!ids.length) return of<any[]>([]);
     return forkJoin(ids.map(id => this.findById(id)));

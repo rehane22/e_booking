@@ -102,10 +102,5 @@ public class AuthServiceImpl implements com.ebooking.backend.service.AuthService
         );
     }
 
-    private long getExpiresInSeconds() {
-        // petite astuce : JwtTokenService a la valeur, mais n’expose pas de getter public ici.
-        // On peut la dupliquer en lisant la même propriété (ou ajouter un getter dans JwtTokenService).
-        // Pour éviter d’alourdir, on renvoie 3600 par défaut — sinon ajoute un getter dans JwtTokenService.
-        return 3600L;
-    }
+
 }

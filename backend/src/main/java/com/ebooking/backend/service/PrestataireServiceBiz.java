@@ -12,4 +12,5 @@ public interface PrestataireServiceBiz {
     void unlinkService(Long prestataireId, Long serviceId, Long currentUserId);
     List<PrestataireResponse> listByService(Long serviceId);
     PrestataireResponse getPublic(Long prestataireId);
+    List<PrestataireResponse> listAll();
 }

@@ -44,7 +44,6 @@ type ProCard = {
 
             <div class="flex gap-2">
               <button class="btn-ghost h-9" (click)="clearSelection()">Réinitialiser</button>
-              <button class="btn-primary h-9" (click)="fetchPros()">Appliquer</button>
             </div>
           </div>
 
@@ -86,54 +85,42 @@ type ProCard = {
 
           <hr class="my-4 border-black/10">
 
-          <div class="flex-1 overflow-auto pr-1" #rightScroll >
-            @if (!selected.size) {
-              <div class="text-sm text-muted p-4">
-                Sélectionnez une ou plusieurs catégories à gauche puis cliquez sur <b>Appliquer</b>.
-              </div>
-            } @else {
-              <div class="grid lg:grid-cols-2 gap-3">
-                @for (p of visiblePros(); track p.id) {
-                  <div class="p-3 rounded-2xl border flex gap-3 items-center">
-                    <!-- Avatar initiales -->
-                    <div class="h-16 w-16 rounded-xl grid place-items-center text-white font-semibold"
-                         [ngClass]="avatarBg(p.id)">
-                      {{ initials(p.nomAffiche) }}
-                    </div>
+          <div class="flex-1 overflow-auto pr-1" #rightScroll>
+            <div class="grid lg:grid-cols-2 gap-3">
+              @for (p of visiblePros(); track p.id) {
+                <div class="p-3 rounded-2xl border flex gap-3 items-center">
+                  <!-- Avatar initiales -->
+                  <div class="h-16 w-16 rounded-xl grid place-items-center text-white font-semibold"
+                       [ngClass]="avatarBg(p.id)">
+                    {{ initials(p.nomAffiche) }}
+                  </div>
 
-                    <div class="flex-1">
-                      <p class="font-medium">{{ p.nomAffiche }}</p>
-                      <p class="text-xs text-muted">
-                        @if (p.specialite) { {{ p.specialite }} · }
-                        @if (p.ville) { {{ p.ville }} }
-                      </p>
-                      <div class="mt-2 flex gap-2">
-                        <!-- Profil -->
-                        <button class="btn-ghost h-9"
-                                [routerLink]="['/prestataires', p.id]">
-                          Profil
-                        </button>
-                        <!-- Voir créneaux (même page, focus sur la section slots) -->
-                        <button class="btn-primary h-9"
-                                [routerLink]="['/prestataires', p.id]"
-                                [queryParams]="{ focus: 'slots' }">
-                          Voir créneaux
-                        </button>
-                      </div>
+                  <div class="flex-1">
+                    <p class="font-medium">{{ p.nomAffiche }}</p>
+                    <p class="text-xs text-muted">
+                      @if (p.specialite) { {{ p.specialite }} · }
+                      @if (p.ville) { {{ p.ville }} }
+                    </p>
+                    <div class="mt-2">
+                      <button class="btn-primary h-9"
+                              [routerLink]="['/prestataires', p.id]"
+                              [queryParams]="{ focus: 'slots' }">
+                        Voir Profil
+                      </button>
                     </div>
                   </div>
-                } @empty {
-                  <div class="text-sm text-muted p-4">
-                    Aucun prestataire pour ces catégories.
-                  </div>
-                }
-              </div>
-
-              @if (canLoadMore()) {
-                <div class="flex justify-center pt-4">
-                  <button class="btn-ghost h-10 px-6" (click)="loadMore()">Charger plus</button>
+                </div>
+              } @empty {
+                <div class="text-sm text-muted p-4">
+                  Aucun prestataire trouvé.
                 </div>
               }
+            </div>
+
+            @if (canLoadMore()) {
+              <div class="flex justify-center pt-4">
+                <button class="btn-ghost h-10 px-6" (click)="loadMore()">Charger plus</button>
+              </div>
             }
           </div>
         </div>
@@ -168,6 +155,8 @@ export class CatalogueServicesPage implements OnInit {
       this.services = list;
       this.servicesView = [...list];
     });
+    // ✅ Charger tous les prestataires au démarrage
+    this.fetchAllPros();
   }
 
   /* ------------ Colonne gauche ------------ */
@@ -177,29 +166,52 @@ export class CatalogueServicesPage implements OnInit {
       ? [...this.services]
       : this.services.filter(s => s.nom.toLowerCase().includes(q));
   }
+
   toggle(id: string|number, el?: any) {
     const willCheck = el ? el.checked : !this.selected.has(id);
     if (willCheck) this.selected.add(id); else this.selected.delete(id);
+    // ✅ Filtrage immédiat au clic
+    this.fetchPros();
   }
-  clearSelection() { this.selected.clear(); }
+
+  clearSelection() {
+    this.selected.clear();
+    this.fetchAllPros();
+  }
+
   selectedArray(){ return Array.from(this.selected); }
   selectedServices() { return this.services.filter(s => this.selected.has(s.id)); }
 
   /* ------------ Colonne droite ------------ */
+  private mapToProCards(list: any[]): ProCard[] {
+    return list.map((p: any) => ({
+      id: p.id,
+      prenom: p.prenom ?? '',
+      nom: p.nom ?? '',
+      nomAffiche: `${p.prenom ?? ''} ${p.nom ?? ''}`.trim() || `Prestataire #${p.id}`,
+      ville: p.adresse,
+      specialite: p.specialite ?? (Array.isArray(p.services) && p.services.length > 0 ? p.services[0].nom : '')
+    }) as ProCard);
+  }
+
+  /** Tous les prestataires */
+  fetchAllPros() {
+    this.proApi.listAll().subscribe(list => {
+      this.prosAll = this.mapToProCards(list);
+      this.applySort();
+      this.resetPaging();
+    });
+  }
+
+  /** Prestataires filtrés par services sélectionnés (si aucun id → tous) */
   fetchPros() {
     const ids = this.selectedArray();
-    if (!ids.length) { this.prosAll = []; this.page = 1; return; }
-
-    // Ton back renvoie déjà {id, prenom, nom, specialite, adresse, services[]}
+    if (!ids.length) {
+      this.fetchAllPros();
+      return;
+    }
     this.proApi.listByServiceIds(ids).subscribe(list => {
-      this.prosAll = list.map((p: any) => ({
-        id: p.id,
-        prenom: p.prenom ?? '',
-        nom: p.nom ?? '',
-        nomAffiche: `${p.prenom ?? ''} ${p.nom ?? ''}`.trim() || `Prestataire #${p.id}`,
-        ville: p.adresse,
-        specialite: p.specialite ?? (Array.isArray(p.services) && p.services.length > 0 ? p.services[0].nom : '')
-      }) as ProCard);
+      this.prosAll = this.mapToProCards(list);
       this.applySort();
       this.resetPaging();
     });
@@ -266,7 +278,6 @@ export class CatalogueServicesPage implements OnInit {
 
     this.proQuery = '';
     this.sortKey = 'nomAffiche';
-    this.prosAll = [];
-    this.page = 1;
+    this.fetchAllPros();
   }
 }

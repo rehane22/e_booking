@@ -38,8 +38,4 @@ export class UserApi {
     );
   }
 
-  updateMe(body: UpdateMePayload) {
-    // endpoint classique côté back : PUT /api/users/me
-    return this.http.put<UserMe>(`${this.base}/users/me`, body);
-  }
 }

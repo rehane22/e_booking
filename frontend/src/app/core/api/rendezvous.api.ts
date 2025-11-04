@@ -4,7 +4,9 @@ import { HttpClient } from '@angular/common/http';
 export type Rdv = {
   id: string|number;
   date: string;      
-  heure: string;      
+  heure: string;  
+  clientNom: string;
+  serviceNom: string;    
   prestataireId: number | string;
   clientId: number | string;
   serviceId: number | string;

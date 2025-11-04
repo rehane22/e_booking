@@ -116,6 +116,14 @@ public class PrestataireServiceBizImpl implements PrestataireServiceBiz {
 
     @Transactional(readOnly = true)
     @Override
+    public List<PrestataireResponse> listAll() {
+        return prestataireRepo.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public PrestataireResponse getPublic(Long prestataireId) {
         var p = prestataireRepo.findById(prestataireId)
                 .orElseThrow(() -> new EntityNotFoundException("Prestataire introuvable"));

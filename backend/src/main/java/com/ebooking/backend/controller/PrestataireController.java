@@ -17,7 +17,7 @@ public class PrestataireController {
 
     private final PrestataireServiceBiz prestataireService;
 
-    // Création du profil prestataire (une seule fois) — réservé PRO
+    // --- PRO only ---
     @PreAuthorize("hasRole('PRO')")
     @PostMapping("/onboarding")
     public ResponseEntity<PrestataireResponse> onboarding(@Valid @RequestBody PrestataireOnboardingRequest req) {
@@ -25,7 +25,6 @@ public class PrestataireController {
         return ResponseEntity.ok(prestataireService.onboard(uid, req));
     }
 
-    // Récupérer mon profil prestataire — réservé PRO
     @PreAuthorize("hasRole('PRO')")
     @GetMapping("/me")
     public ResponseEntity<PrestataireResponse> me() {
@@ -33,7 +32,6 @@ public class PrestataireController {
         return ResponseEntity.ok(prestataireService.getMine(uid));
     }
 
-    // Lier un service à mon profil — réservé PRO + owner
     @PreAuthorize("hasRole('PRO')")
     @PostMapping("/{prestataireId}/services/{serviceId}")
     public ResponseEntity<PrestataireResponse> link(@PathVariable Long prestataireId, @PathVariable Long serviceId) {
@@ -41,7 +39,6 @@ public class PrestataireController {
         return ResponseEntity.ok(prestataireService.linkService(prestataireId, serviceId, uid));
     }
 
-    // Délier un service — réservé PRO + owner
     @PreAuthorize("hasRole('PRO')")
     @DeleteMapping("/{prestataireId}/services/{serviceId}")
     public ResponseEntity<Void> unlink(@PathVariable Long prestataireId, @PathVariable Long serviceId) {
@@ -50,19 +47,21 @@ public class PrestataireController {
         return ResponseEntity.noContent().build();
     }
 
-    // Public : lister les prestataires proposant un service donné
+    // --- PUBLIC ---
+
+    /** ✅ Liste complète (aucun paramètre) */
     @GetMapping
-    public ResponseEntity<?> listByService(@RequestParam(name = "serviceId", required = false) Long serviceId) {
-        if (serviceId == null) {
-            // Si pas de param, on peut renvoyer 400 ou une liste vide/explicative. Ici 400.
-            return ResponseEntity.badRequest().body(
-                    java.util.Map.of("message", "Paramètre 'serviceId' requis")
-            );
-        }
+    public ResponseEntity<?> listAll() {
+        return ResponseEntity.ok(prestataireService.listAll());
+    }
+
+    /** ✅ Liste filtrée par serviceId (désambiguïsation via params="serviceId") */
+    @GetMapping(params = "serviceId")
+    public ResponseEntity<?> listByService(@RequestParam("serviceId") Long serviceId) {
         return ResponseEntity.ok(prestataireService.listByService(serviceId));
     }
 
-    // Public : détail d’un prestataire (nom, prénom, spécialité, adresse, services)
+    /** Détail public */
     @GetMapping("/{id}")
     public ResponseEntity<PrestataireResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(prestataireService.getPublic(id));

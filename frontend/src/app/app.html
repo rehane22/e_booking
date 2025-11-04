@@ -5,14 +5,8 @@
     <router-outlet></router-outlet>
   </main>
 
-  <!-- Bottom nav visible uniquement en mobile -->
+
   @if (isLoggedIn()) {
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-black/5 md:hidden">
-      <ul class="grid grid-cols-3 text-xs">
-        <li><button routerLink="/services" class="w-full flex flex-col items-center py-3">🧭<span>Catalogue</span></button></li>
-        @if (has('PRO'))    { <li><button routerLink="/pro" class="w-full flex flex-col items-center py-3">🧰<span>Pro</span></button></li> }
-        @if (has('ADMIN'))  { <li><button routerLink="/admin/monitoring" class="w-full flex flex-col items-center py-3">🛡️<span>Admin</span></button></li> }
-      </ul>
-    </nav>
+  
   }
 </div>
