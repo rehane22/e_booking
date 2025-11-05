@@ -4,7 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 export type Disponibilite = {
   id: string|number;
   prestataireId: string|number;
-  jourSemaine: number;            // 1..7 (lun..dim) par ex.
+  jourSemaine: 'LUNDI'|'MARDI'|'MERCREDI'|'JEUDI'|'VENDREDI'|'SAMEDI'|'DIMANCHE';
   heureDebut: string;             // "09:00"
   heureFin: string;               // "17:00"
   serviceId?: string|number|null;
@@ -27,8 +27,6 @@ export class DisponibiliteApi {
   remove(id: string|number) {
     return this.http.delete<void>(`${this.base}/disponibilites/${id}`);
   }
-  
-
 
   /** Endpoint public: slots dispo pour un prestataire à une date (serviceId optionnel) */
   slotsForDate(prestataireId: string|number, dateISO: string, serviceId?: string|number|null) {
@@ -36,7 +34,4 @@ export class DisponibiliteApi {
     if (serviceId != null) params = params.set('serviceId', String(serviceId));
     return this.http.get<string[]>(`${this.base}/disponibilites/${prestataireId}/slots`, { params });
   }
-
-
-
 }

@@ -15,8 +15,6 @@ export const routes: Routes = [
 
     // Client (auth)
     { path: 'services', loadComponent: () => import('./pages/client/catalogue-services/catalogue-services.page').then(m => m.CatalogueServicesPage) },
- 
-    { path: 'rendezvous/nouveau', canMatch: [authGuard], loadComponent: () => import('./pages/client/rendezvous-nouveau/rendezvous-nouveau.page').then(m => m.RendezvousNouveauPage) },
     { path: 'mon-compte', canMatch: [authGuard], loadComponent: () => import('./pages/client/mon-compte/mon-compte.page').then(m => m.MonComptePage) },
   
     // Pro

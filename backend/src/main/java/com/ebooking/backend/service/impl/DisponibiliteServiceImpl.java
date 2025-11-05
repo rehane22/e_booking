@@ -2,11 +2,13 @@ package com.ebooking.backend.service.impl;
 
 import com.ebooking.backend.dto.dispo.DisponibiliteRequest;
 import com.ebooking.backend.dto.dispo.DisponibiliteResponse;
+import com.ebooking.backend.dto.dispo.DisponibiliteUpdateRequest;
 import com.ebooking.backend.exception.UnprocessableEntityException;
 import com.ebooking.backend.model.Disponibilite;
 import com.ebooking.backend.model.Prestataire;
 import com.ebooking.backend.model.ServiceCatalog;
 import com.ebooking.backend.model.enums.JourSemaine;
+import com.ebooking.backend.model.enums.StatutRdv;
 import com.ebooking.backend.repository.*;
 import com.ebooking.backend.service.DisponibiliteService;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,15 +35,7 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
     @Transactional(readOnly = true)
     @Override
     public List<DisponibiliteResponse> listByPrestataire(Long prestataireId) {
-        return dispoRepo.findByPrestataireIdAndJourSemaine(prestataireId, JourSemaine.LUNDI) // trick? non, on veut tout
-                .stream().map(this::toResp).toList();
-    }
-
-    // Correction : on veut tout (pas seulement LUNDI) => surcharge :
-    @Transactional(readOnly = true)
-    public List<DisponibiliteResponse> listAllByPrestataire(Long prestataireId) {
-        return dispoRepo.findAll().stream()
-                .filter(d -> Objects.equals(d.getPrestataire().getId(), prestataireId))
+        return dispoRepo.findByPrestataireId(prestataireId).stream()
                 .map(this::toResp)
                 .toList();
     }
@@ -79,9 +73,8 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
     }
 
     @Override
-    public DisponibiliteResponse update(Long currentUserId, Long dispoId, DisponibiliteRequest req) {
-        Disponibilite d = dispoRepo.findById(dispoId)
-                .orElseThrow(() -> new EntityNotFoundException("Disponibilité introuvable"));
+    public DisponibiliteResponse update(Long currentUserId, Long dispoId, DisponibiliteUpdateRequest req) {
+        var d = dispoRepo.findById(dispoId).orElseThrow(() -> new EntityNotFoundException("Disponibilité introuvable"));
         ensureOwner(d, currentUserId);
 
         Prestataire p = d.getPrestataire();
@@ -141,13 +134,11 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
 
     private void checkOverlapsOnCreate(Long prestataireId, JourSemaine jour, LocalTime debut, LocalTime fin, ServiceCatalog sc) {
         if (sc == null) {
-            // on crée un GÉNÉRAL : interdit d'overlap avec GÉNÉRAUX + avec ANY SPÉCIFIQUE
             if (!dispoRepo.findOverlapsWithGenerals(prestataireId, jour, debut, fin).isEmpty()
                     || !dispoRepo.findOverlapsWithAnySpecific(prestataireId, jour, debut, fin).isEmpty()) {
                 throw new UnprocessableEntityException("Chevauchement détecté avec un créneau existant (général/spécifique)");
             }
         } else {
-            // on crée un SPÉCIFIQUE : interdit d'overlap avec GÉNÉRAUX + SPÉCIFIQUES(serviceId)
             if (!dispoRepo.findOverlapsWithGenerals(prestataireId, jour, debut, fin).isEmpty()
                     || !dispoRepo.findOverlapsWithSpecific(prestataireId, jour, sc.getId(), debut, fin).isEmpty()) {
                 throw new UnprocessableEntityException("Chevauchement détecté avec un créneau existant");
@@ -179,38 +170,28 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
     @Override
     public List<String> slotsForDate(Long prestataireId, Long serviceId, String dateIso, Integer stepMinutes) {
         if (stepMinutes == null || stepMinutes <= 0) stepMinutes = 30;
-        LocalDate date = LocalDate.parse(dateIso);
-        JourSemaine jour = dayToJour(date.getDayOfWeek());
+        var date = LocalDate.parse(dateIso);
+        var jour = dayToJour(date.getDayOfWeek());
 
-        // Valider prestataire
         Prestataire p = prestataireRepo.findById(prestataireId)
                 .orElseThrow(() -> new EntityNotFoundException("Prestataire introuvable"));
 
-        // Si serviceId fourni, vérifier qu’il existe et que le prestataire l’offre
         ServiceCatalog sc = null;
         if (serviceId != null) {
             sc = serviceRepo.findById(serviceId)
                     .orElseThrow(() -> new EntityNotFoundException("Service introuvable"));
             boolean linked = prestataireServiceRepo.existsByPrestataireIdAndServiceId(prestataireId, serviceId);
-            if (!linked) {
-                throw new UnprocessableEntityException("Ce prestataire n'offre pas ce service");
-            }
+            if (!linked) throw new UnprocessableEntityException("Ce prestataire n'offre pas ce service");
         }
 
-        // Récupérer les dispos du bon jour
-        List<Disponibilite> sameDay = dispoRepo.findByPrestataireIdAndJourSemaine(prestataireId, jour);
+        var sameDay = dispoRepo.findByPrestataireIdAndJourSemaine(prestataireId, jour);
 
-        // Filtrer : créneaux généraux + (si serviceId != null) créneaux spécifiques de ce service
         List<Disponibilite> applicable = new ArrayList<>();
         for (Disponibilite d : sameDay) {
-            if (d.getService() == null) {
-                applicable.add(d); // général
-            } else if (sc != null && d.getService().getId().equals(sc.getId())) {
-                applicable.add(d); // spécifique du service
-            }
+            if (d.getService() == null) applicable.add(d);
+            else if (sc != null && d.getService().getId().equals(sc.getId())) applicable.add(d);
         }
 
-        // Générer les slots HH:mm (fin exclue) pour chaque créneau applicable
         Set<String> all = new TreeSet<>();
         for (Disponibilite d : applicable) {
             for (var t = d.getHeureDebut();
@@ -220,9 +201,10 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
             }
         }
 
-        // Retirer les heures déjà réservées à cette date
-        var rdvs = rdvRepo.findByPrestataireIdAndDateOrderByHeureAsc(prestataireId, date);
-        for (var r : rdvs) {
+        var rdvsBloquants = rdvRepo.findByPrestataireIdAndDateAndStatutIn(
+                prestataireId, date, java.util.List.of(StatutRdv.EN_ATTENTE, StatutRdv.CONFIRME)
+        );
+        for (var r : rdvsBloquants) {
             all.remove(r.getHeure().toString());
         }
 

@@ -2,6 +2,7 @@ package com.ebooking.backend.controller;
 
 import com.ebooking.backend.dto.dispo.DisponibiliteRequest;
 import com.ebooking.backend.dto.dispo.DisponibiliteResponse;
+import com.ebooking.backend.dto.dispo.DisponibiliteUpdateRequest;
 import com.ebooking.backend.security.CurrentUser;
 import com.ebooking.backend.service.DisponibiliteService;
 import jakarta.validation.Valid;
@@ -16,17 +17,15 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/disponibilites") // pas de /api ici
+@RequestMapping("/disponibilites") // <-- aligné avec le front
 public class DisponibiliteController {
 
     private final DisponibiliteService dispoService;
 
-    // Public : lister toutes les dispos d'un prestataire
+    // Public : lister toutes les dispos d'un prestataire (tous jours)
     @GetMapping("/{prestataireId}")
     public ResponseEntity<List<DisponibiliteResponse>> list(@PathVariable Long prestataireId) {
-        // utilise la méthode qui liste tout (tous jours)
-        return ResponseEntity.ok(((com.ebooking.backend.service.impl.DisponibiliteServiceImpl)dispoService)
-                .listAllByPrestataire(prestataireId));
+        return ResponseEntity.ok(dispoService.listByPrestataire(prestataireId));
     }
 
     // PRO owner : create
@@ -41,7 +40,7 @@ public class DisponibiliteController {
     @PreAuthorize("hasRole('PRO')")
     @PutMapping("/{id}")
     public ResponseEntity<DisponibiliteResponse> update(@PathVariable Long id,
-                                                        @Valid @RequestBody DisponibiliteRequest req) {
+                                                        @Valid @RequestBody DisponibiliteUpdateRequest req) {
         Long uid = CurrentUser.id();
         return ResponseEntity.ok(dispoService.update(uid, id, req));
     }
@@ -55,6 +54,7 @@ public class DisponibiliteController {
         return ResponseEntity.noContent().build();
     }
 
+    // Public : slots
     @GetMapping("/{prestataireId}/slots")
     public ResponseEntity<List<String>> slots(
             @PathVariable Long prestataireId,

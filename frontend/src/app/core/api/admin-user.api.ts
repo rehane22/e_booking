@@ -31,33 +31,38 @@ export interface Page<T> {
 @Injectable({ providedIn: 'root' })
 export class AdminUserApi {
   private http = inject(HttpClient);
+  // garde /api si ton proxy le réécrit vers le back ; sinon mets simplement '/admin/users'
   private base = '/api/admin/users';
 
   list(opts: {
     query?: string;
-    statut?: UserStatus | 'ALL';
+    // ⚠️ le back attend `status`, pas `statut`
+    status?: UserStatus | 'ALL';
     page?: number;
     size?: number;
-    sort?: string; 
+    sort?: string;
   }): Observable<Page<AdminUserItem>> {
-    let params = new HttpParams();
-    if (opts?.query) params = params.set('query', opts.query);
-    if (opts?.statut && opts.statut !== 'ALL') params = params.set('statut', opts.statut);
-    params = params.set('page', String(opts?.page ?? 0));
-    params = params.set('size', String(opts?.size ?? 20));
-    if (opts?.sort) params = params.set('sort', opts.sort);
-    return this.http.get<Page<AdminUserItem>>(this.base);
+    let params = new HttpParams()
+      .set('page', String(opts?.page ?? 0))
+      .set('size', String(opts?.size ?? 20));
+
+    if (opts?.query)  params = params.set('query', opts.query);
+    if (opts?.status && opts.status !== 'ALL') params = params.set('status', opts.status);
+    if (opts?.sort)   params = params.set('sort', opts.sort);
+
+    return this.http.get<Page<AdminUserItem>>(this.base, { params });
   }
 
   get(id: number | string): Observable<AdminUserDetail> {
     return this.http.get<AdminUserDetail>(`${this.base}/${id}`);
   }
 
+  // ✅ passer en POST pour matcher le backend
   activate(id: number | string) {
-    return this.http.patch<void>(`${this.base}/${id}/activate`, {});
+    return this.http.post<void>(`${this.base}/${id}/activate`, {});
   }
 
   block(id: number | string) {
-    return this.http.patch<void>(`${this.base}/${id}/block`, {});
+    return this.http.post<void>(`${this.base}/${id}/block`, {});
   }
 }

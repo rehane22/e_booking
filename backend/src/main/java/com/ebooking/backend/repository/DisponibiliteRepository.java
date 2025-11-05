@@ -10,9 +10,12 @@ import java.util.List;
 
 public interface DisponibiliteRepository extends JpaRepository<Disponibilite, Long> {
 
+    List<Disponibilite> findByPrestataireId(Long prestataireId);
+
     List<Disponibilite> findByPrestataireIdAndJourSemaine(Long prestataireId, JourSemaine jour);
 
     List<Disponibilite> findByJourSemaine(JourSemaine jour);
+
     /* ---- Vérifier si un horaire est couvert par un créneau (général OU spécifique(serviceId)) ---- */
     @Query("""
            select d from Disponibilite d
@@ -24,13 +27,7 @@ public interface DisponibiliteRepository extends JpaRepository<Disponibilite, Lo
            """)
     List<Disponibilite> findCoveringSlot(Long prestataireId, JourSemaine jour, Long serviceId, LocalTime heure);
 
-    /* ---- Détection d'overlap (anti-chevauchement) ----
-       Règles à implémenter côté service :
-       1) général↔général interdit
-       2) spécifique(X)↔spécifique(X) interdit
-       3) général↔spécifique(any) interdit
-       Les méthodes ci-dessous servent ces 3 cas.
-    */
+    /* ---- Détection d'overlap (anti-chevauchement) ---- */
 
     // 1) Overlap avec des créneaux GÉNÉRAUX existants (service IS NULL)
     @Query("""
@@ -54,9 +51,7 @@ public interface DisponibiliteRepository extends JpaRepository<Disponibilite, Lo
     List<Disponibilite> findOverlapsWithSpecific(Long prestataireId, JourSemaine jour, Long serviceId,
                                                  LocalTime heureDebut, LocalTime heureFin);
 
-    // 3) Overlap GÉNÉRAL (existant) ↔ SPÉCIFIQUE (qu'on tente de créer) et inversement
-    //    -> si on crée un SPÉCIFIQUE: vérifier overlap avec GÉNÉRAUX existants (méthode 1)
-    //    -> si on crée un GÉNÉRAL: vérifier overlap avec TOUT SPÉCIFIQUE (peu importe le service)
+    // 3) Overlap GÉNÉRAL ↔ SPÉCIFIQUE(any)
     @Query("""
            select d from Disponibilite d
            where d.prestataire.id = :prestataireId

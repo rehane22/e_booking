@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-export type ServiceItem = { id: string|number; nom: string; icon?: string };
+export type ServiceItem = { id: string|number; nom: string; description?: string; };
 
 @Injectable({ providedIn: 'root' })
 export class ServiceCatalogApi {
@@ -12,3 +12,4 @@ export class ServiceCatalogApi {
   update(id: string|number, body: any) { return this.http.put<ServiceItem>(`${this.base}/services/${id}`, body); }
   remove(id: string|number) { return this.http.delete<void>(`${this.base}/services/${id}`); }
 }
+

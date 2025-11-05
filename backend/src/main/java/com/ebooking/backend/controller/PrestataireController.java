@@ -12,12 +12,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/prestataires") // pas de /api ici
+@RequestMapping("/prestataires")
 public class PrestataireController {
-
     private final PrestataireServiceBiz prestataireService;
 
-    // --- PRO only ---
     @PreAuthorize("hasRole('PRO')")
     @PostMapping("/onboarding")
     public ResponseEntity<PrestataireResponse> onboarding(@Valid @RequestBody PrestataireOnboardingRequest req) {
@@ -47,21 +45,22 @@ public class PrestataireController {
         return ResponseEntity.noContent().build();
     }
 
-    // --- PUBLIC ---
-
-    /** ✅ Liste complète (aucun paramètre) */
     @GetMapping
     public ResponseEntity<?> listAll() {
         return ResponseEntity.ok(prestataireService.listAll());
     }
 
-    /** ✅ Liste filtrée par serviceId (désambiguïsation via params="serviceId") */
+    /**
+     * ✅ Liste filtrée par serviceId (désambiguïsation via params="serviceId")
+     */
     @GetMapping(params = "serviceId")
     public ResponseEntity<?> listByService(@RequestParam("serviceId") Long serviceId) {
         return ResponseEntity.ok(prestataireService.listByService(serviceId));
     }
 
-    /** Détail public */
+    /**
+     * Détail public
+     */
     @GetMapping("/{id}")
     public ResponseEntity<PrestataireResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(prestataireService.getPublic(id));

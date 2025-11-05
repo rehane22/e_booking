@@ -13,7 +13,8 @@ import { AdminUserApi, AdminUserItem } from '../../../core/api/admin-user.api';
     <div class="flex items-center justify-between mt-4">
       <h1 class="text-2xl font-semibold">Utilisateurs</h1>
     </div>
-
+    
+    <div class="text-sm text-muted">Total: {{ total }}</div>
     <div class="card p-0 overflow-hidden">
       <table class="w-full text-sm">
         <thead class="bg-gray-50">
@@ -23,7 +24,6 @@ import { AdminUserApi, AdminUserItem } from '../../../core/api/admin-user.api';
             <th class="text-left px-4 py-3">Rôles</th>
             <th class="text-left px-4 py-3">Statut</th>
             <th class="text-left px-4 py-3">Créé</th>
-            <th class="text-left px-4 py-3">Dernière connexion</th>
             <th class="text-right px-4 py-3">Actions</th>
           </tr>
         </thead>
@@ -38,7 +38,6 @@ import { AdminUserApi, AdminUserItem } from '../../../core/api/admin-user.api';
                   </div>
                   <div>
                     <div class="font-medium">{{ u.prenom }} {{ u.nom }}</div>
-                    <div class="text-xs text-muted">#{{ u.id }}</div>
                   </div>
                 </div>
               </td>
@@ -52,7 +51,6 @@ import { AdminUserApi, AdminUserItem } from '../../../core/api/admin-user.api';
                 <span [ngClass]="statusBadge(u.statut)">{{ u.statut }}</span>
               </td>
               <td class="px-4 py-3">{{ u.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
-              <td class="px-4 py-3">{{ u.lastLoginAt ? (u.lastLoginAt | date:'yyyy-MM-dd HH:mm') : '—' }}</td>
               <td class="px-4 py-3 text-right">
                 <a class="btn-ghost h-9 mr-2" [routerLink]="['/admin/users', u.id]">Voir</a>
                 @if (u.statut !== 'ACTIF') {
@@ -71,8 +69,8 @@ import { AdminUserApi, AdminUserItem } from '../../../core/api/admin-user.api';
       </table>
     </div>
 
-    <div class="flex items-center justify-between">
-      <div class="text-sm text-muted">Total: {{ total }}</div>
+    <div class="flex items-center justify-end">
+      
       <div class="flex gap-2">
         <button class="btn-ghost h-9" [disabled]="page===0" (click)="load(page-1)">Précédent</button>
         <button class="btn-ghost h-9" [disabled]="(page+1)*size >= total" (click)="load(page+1)">Suivant</button>
@@ -86,15 +84,24 @@ export class UsersListPage implements OnInit {
 
   items: AdminUserItem[] = [];
   total = 0; page = 0; size = 20;
-  query = ''; statut: 'ALL'|'ACTIF'|'BLOQUE' = 'ALL';
+  query = '';
+  status: 'ALL'|'ACTIF'|'BLOQUE' = 'ALL'; // ← renommé
   sort = 'createdAt,DESC';
 
   ngOnInit() { this.load(0); }
 
   load(p = 0) {
     this.page = p;
-    this.api.list({ query: this.query, statut: this.statut, page: this.page, size: this.size, sort: this.sort })
-      .subscribe(res => { this.items = res.items; this.total = res.total; });
+    this.api.list({
+      query: this.query,
+      status: this.status,   // ← utiliser `status`
+      page: this.page,
+      size: this.size,
+      sort: this.sort
+    }).subscribe(res => {
+      this.items = res.items;
+      this.total = res.total;
+    });
   }
 
   activate(u: AdminUserItem) {

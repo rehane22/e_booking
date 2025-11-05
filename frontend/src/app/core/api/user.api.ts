@@ -15,7 +15,6 @@ export type UpdateMePayload = {
   prenom?: string;
   nom?: string;
   telephone?: string;
-  // email non modifiable ici
 };
 
 @Injectable({ providedIn: 'root' })
