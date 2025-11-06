@@ -29,9 +29,10 @@ export class DisponibiliteApi {
   }
 
   /** Endpoint public: slots dispo pour un prestataire à une date (serviceId optionnel) */
-  slotsForDate(prestataireId: string|number, dateISO: string, serviceId?: string|number|null) {
+  slotsForDate(prestataireId: string|number, dateISO: string, serviceId?: string|number|null, dureeMin?: number|null) {
     let params = new HttpParams().set('date', dateISO);
     if (serviceId != null) params = params.set('serviceId', String(serviceId));
+    if (dureeMin != null) params = params.set('dureeMin', String(dureeMin));
     return this.http.get<string[]>(`${this.base}/disponibilites/${prestataireId}/slots`, { params });
   }
 }

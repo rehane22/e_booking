@@ -6,6 +6,7 @@ import com.ebooking.backend.dto.dispo.DisponibiliteUpdateRequest;
 import com.ebooking.backend.exception.UnprocessableEntityException;
 import com.ebooking.backend.model.Disponibilite;
 import com.ebooking.backend.model.Prestataire;
+import com.ebooking.backend.model.RendezVous;
 import com.ebooking.backend.model.ServiceCatalog;
 import com.ebooking.backend.model.enums.JourSemaine;
 import com.ebooking.backend.model.enums.StatutRdv;
@@ -31,6 +32,7 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
     private final ServiceRepository serviceRepo;
     private final PrestataireServiceRepository prestataireServiceRepo;
     private final RendezVousRepository rdvRepo;
+    private static final int DEFAULT_DURATION_MINUTES = 60;
 
     @Transactional(readOnly = true)
     @Override
@@ -168,7 +170,7 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<String> slotsForDate(Long prestataireId, Long serviceId, String dateIso, Integer stepMinutes) {
+    public List<String> slotsForDate(Long prestataireId, Long serviceId, String dateIso, Integer stepMinutes, Integer dureeMinutes) {
         if (stepMinutes == null || stepMinutes <= 0) stepMinutes = 30;
         var date = LocalDate.parse(dateIso);
         var jour = dayToJour(date.getDayOfWeek());
@@ -192,23 +194,34 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
             else if (sc != null && d.getService().getId().equals(sc.getId())) applicable.add(d);
         }
 
-        Set<String> all = new TreeSet<>();
+        int requiredDuration = determineRequestedDuration(sc, stepMinutes, dureeMinutes);
+        Set<LocalTime> all = new TreeSet<>();
         for (Disponibilite d : applicable) {
             for (var t = d.getHeureDebut();
                  t.plusMinutes(stepMinutes).compareTo(d.getHeureFin()) <= 0;
                  t = t.plusMinutes(stepMinutes)) {
-                all.add(t.toString()); // "HH:mm"
+                LocalTime candidateEnd = t.plusMinutes(requiredDuration);
+                if (candidateEnd.isBefore(t)) continue; // évite de déborder sur le lendemain
+                if (!candidateEnd.isAfter(d.getHeureFin())) {
+                    all.add(t);
+                }
             }
         }
 
         var rdvsBloquants = rdvRepo.findByPrestataireIdAndDateAndStatutIn(
                 prestataireId, date, java.util.List.of(StatutRdv.EN_ATTENTE, StatutRdv.CONFIRME)
         );
-        for (var r : rdvsBloquants) {
-            all.remove(r.getHeure().toString());
+        for (RendezVous r : rdvsBloquants) {
+            LocalTime rdvStart = r.getHeure();
+            LocalTime rdvEnd = rdvStart.plusMinutes(durationForRendezVous(r, stepMinutes));
+            if (rdvEnd.isBefore(rdvStart)) {
+                rdvEnd = LocalTime.MAX; // si la durée déborde, bloquer le reste de la journée
+            }
+            LocalTime finalRdvEnd = rdvEnd;
+            all.removeIf(slot -> (slot.equals(rdvStart) || slot.isAfter(rdvStart)) && slot.isBefore(finalRdvEnd));
         }
 
-        return new ArrayList<>(all);
+        return all.stream().map(LocalTime::toString).toList();
     }
 
     private JourSemaine dayToJour(java.time.DayOfWeek dow) {
@@ -221,6 +234,40 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
             case SATURDAY -> JourSemaine.SAMEDI;
             case SUNDAY -> JourSemaine.DIMANCHE;
         };
+    }
+
+    private int determineRequestedDuration(ServiceCatalog service, int fallback, Integer requested) {
+        if (requested != null && requested > 0) {
+            return requested;
+        }
+        Integer serviceDur = extractServiceDuration(service);
+        if (serviceDur != null && serviceDur > 0) {
+            return serviceDur;
+        }
+        return Math.max(DEFAULT_DURATION_MINUTES, Math.max(fallback, 1));
+    }
+
+    private int durationForRendezVous(RendezVous r, int fallback) {
+        Integer stored = r.getDureeMinutes();
+        if (stored != null && stored > 0) {
+            return stored;
+        }
+        int duration = determineRequestedDuration(r.getService(), fallback, null);
+        r.setDureeMinutes(duration);
+        return duration;
+    }
+
+    private Integer extractServiceDuration(ServiceCatalog service) {
+        if (service == null) return null;
+        try {
+            var method = service.getClass().getMethod("getDureeMin");
+            Object val = method.invoke(service);
+            if (val instanceof Integer di) {
+                return di;
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
     private DisponibiliteResponse toResp(Disponibilite d) {

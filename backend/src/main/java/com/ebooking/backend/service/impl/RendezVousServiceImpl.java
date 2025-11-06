@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.*;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,8 @@ public class RendezVousServiceImpl implements RendezVousService {
     private final PrestataireServiceRepository prestataireServiceRepo;
     private final DisponibiliteRepository dispoRepo;
     private final UserRepository userRepo;
+    private static final List<StatutRdv> BLOCKING_STATUSES = List.of(StatutRdv.EN_ATTENTE, StatutRdv.CONFIRME);
+    private static final int DEFAULT_DURATION_MINUTES = 60;
 
     @Override
     public RendezVousResponse create(Long currentUserId, RendezVousRequest req) {
@@ -41,13 +44,23 @@ public class RendezVousServiceImpl implements RendezVousService {
         LocalDate date = LocalDate.parse(req.date());
         LocalTime heure = LocalTime.parse(req.heure());
         JourSemaine jour = dayToJour(date.getDayOfWeek());
+        int duree = resolveDuration(req.dureeMin(), sc);
+        final LocalTime fin = safeAddMinutes(heure, duree);
         var covering = dispoRepo.findCoveringSlot(p.getId(), jour, sc.getId(), heure);
-        if (covering.isEmpty())
+        if (covering.stream().noneMatch(d -> !fin.isAfter(d.getHeureFin())))
             throw new UnprocessableEntityException("Pas de créneau disponible couvrant cet horaire");
-        if (rdvRepo.existsByPrestataireIdAndDateAndHeure(p.getId(), date, heure)) {
+        if (hasOverlap(p.getId(), date, heure, duree, null)) {
             throw new UnprocessableEntityException("Créneau déjà réservé");
         }
-        RendezVous rdv = RendezVous.builder().service(sc).prestataire(p).client(client).date(date).heure(heure).statut(StatutRdv.EN_ATTENTE).build();
+        RendezVous rdv = RendezVous.builder()
+                .service(sc)
+                .prestataire(p)
+                .client(client)
+                .date(date)
+                .heure(heure)
+                .dureeMinutes(duree)
+                .statut(StatutRdv.EN_ATTENTE)
+                .build();
         rdv = rdvRepo.save(rdv);
         return toResp(rdv);
     }
@@ -143,15 +156,22 @@ public class RendezVousServiceImpl implements RendezVousService {
         if (req.heure() != null) heure = LocalTime.parse(req.heure());
         JourSemaine jour = dayToJour(date.getDayOfWeek());
         var covering = dispoRepo.findCoveringSlot(rdv.getPrestataire().getId(), jour, service.getId(), heure);
-        if (covering.isEmpty())
+        Integer storedDuration = rdv.getDureeMinutes();
+        int duree = (storedDuration != null && storedDuration > 0)
+                ? storedDuration
+                : resolveDuration(null, service);
+        final LocalTime fin = safeAddMinutes(heure, duree);
+        if (covering.stream().noneMatch(d -> !fin.isAfter(d.getHeureFin())))
             throw new UnprocessableEntityException("Pas de créneau disponible couvrant cet horaire");
-        boolean occupied = rdvRepo.existsByPrestataireIdAndDateAndHeure(rdv.getPrestataire().getId(), date, heure);
-        if (occupied && !(date.equals(rdv.getDate()) && heure.equals(rdv.getHeure()))) {
+        if (hasOverlap(rdv.getPrestataire().getId(), date, heure, duree, rdv.getId())) {
             throw new UnprocessableEntityException("Créneau déjà réservé");
         }
         rdv.setService(service);
         rdv.setDate(date);
         rdv.setHeure(heure); // Optionnel: repasser en EN_ATTENTE si déjà confirmé
+        if (rdv.getDureeMinutes() == null || rdv.getDureeMinutes() <= 0) {
+            rdv.setDureeMinutes(duree);
+        }
         if (rdv.getStatut() == StatutRdv.CONFIRME) {
             rdv.setStatut(StatutRdv.EN_ATTENTE);
         }
@@ -170,15 +190,75 @@ public class RendezVousServiceImpl implements RendezVousService {
         };
     }
 
-    private RendezVousResponse toResp(RendezVous r) {
-        Integer duree = null;
+    private int resolveDuration(Integer requested, ServiceCatalog service) {
+        if (requested != null) {
+            if (requested <= 0) {
+                throw new UnprocessableEntityException("La durée doit être strictement positive");
+            }
+            return requested;
+        }
+        Integer serviceDuration = extractServiceDuration(service);
+        if (serviceDuration != null && serviceDuration > 0) {
+            return serviceDuration;
+        }
+        return DEFAULT_DURATION_MINUTES;
+    }
+
+    private Integer extractServiceDuration(ServiceCatalog service) {
+        if (service == null) return null;
         try {
-            // si ta table ServiceCatalog possède un champ dureeMin (Integer)
-            var m = r.getService().getClass().getMethod("getDureeMin");
-            Object val = m.invoke(r.getService());
-            if (val instanceof Integer di) duree = di;
+            var method = service.getClass().getMethod("getDureeMin");
+            Object val = method.invoke(service);
+            if (val instanceof Integer di) {
+                return di;
+            }
         } catch (Exception ignored) {
         }
+        return null;
+    }
+
+    private LocalTime safeAddMinutes(LocalTime start, int minutes) {
+        if (minutes <= 0) {
+            throw new UnprocessableEntityException("La durée doit être strictement positive");
+        }
+        LocalTime end = start.plusMinutes(minutes);
+        if (end.isBefore(start)) {
+            throw new UnprocessableEntityException("La durée ne peut pas dépasser minuit");
+        }
+        return end;
+    }
+
+    private boolean hasOverlap(Long prestataireId, LocalDate date, LocalTime start, int dureeMinutes, Long ignoreRdvId) {
+        LocalTime end = safeAddMinutes(start, dureeMinutes);
+        var existing = rdvRepo.findByPrestataireIdAndDateAndStatutIn(prestataireId, date, BLOCKING_STATUSES);
+        for (RendezVous other : existing) {
+            if (ignoreRdvId != null && Objects.equals(other.getId(), ignoreRdvId)) continue;
+            int otherDuration = blockingDurationOf(other);
+            LocalTime otherEnd = other.getHeure().plusMinutes(otherDuration);
+            if (otherEnd.isBefore(other.getHeure())) {
+                otherEnd = LocalTime.MAX;
+            }
+            if (!(end.compareTo(other.getHeure()) <= 0 || start.compareTo(otherEnd) >= 0)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int blockingDurationOf(RendezVous rdv) {
+        Integer stored = rdv.getDureeMinutes();
+        if (stored != null && stored > 0) {
+            return stored;
+        }
+        Integer serviceDuration = extractServiceDuration(rdv.getService());
+        int duration = (serviceDuration != null && serviceDuration > 0) ? serviceDuration : DEFAULT_DURATION_MINUTES;
+        rdv.setDureeMinutes(duration);
+        return duration;
+    }
+
+    private RendezVousResponse toResp(RendezVous r) {
+        Integer duree = Optional.ofNullable(r.getDureeMinutes())
+                .orElseGet(() -> extractServiceDuration(r.getService()));
         return new RendezVousResponse(r.getId(), r.getService().getId(), r.getPrestataire().getId(), r.getClient().getId(), r.getDate().toString(), r.getHeure().toString(), r.getStatut().name(), duree);
     }
 }

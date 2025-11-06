@@ -174,6 +174,7 @@ export class PrestataireDetailPage implements OnInit {
   // Grille affichée (toute la plage d’ouverture du jour, pas = stepMin)
   grid: string[] = [];
   stepMin = 30;
+  private readonly gridBaseStep = 30;
 
   // UI state
   loading = false;
@@ -219,25 +220,20 @@ export class PrestataireDetailPage implements OnInit {
     this.apiSlots = [];
     this.apiSlotsSet.clear();
 
-    this.dispoApi.slotsForDate(this.id, this.date, this.serviceId ?? undefined).subscribe({
+    this.dispoApi.slotsForDate(this.id, this.date, this.serviceId ?? undefined, this.dureeMin).subscribe({
       next: (arr) => {
         this.apiSlots = arr ?? [];
         this.apiSlotsSet = new Set(this.apiSlots);
 
         // infère le pas (15/30) d'après les 2 premiers slots sinon 30
-        this.stepMin = this.inferStep(this.apiSlots) ?? 30;
+        this.stepMin = this.inferStep(this.apiSlots) ?? this.gridBaseStep;
 
-        // reconstruit la grille du jour (toutes les cases, même celles indispo)
-        this.grid = this.buildDayGrid();
-
-        // applique le masque “réservable si toutes les cases couvrant la durée sont libres”
-        this.recomputeGridMask();
+        this.updateGridMask();
       },
       error: () => {
         this.errorText = 'Impossible de charger les créneaux.';
-        // même si erreur, on tente de montrer une grille basée sur les dispos
-        this.stepMin = 30;
-        this.grid = this.buildDayGrid();
+        this.stepMin = this.gridBaseStep;
+        this.updateGridMask();
       }
     });
   }
@@ -252,15 +248,16 @@ export class PrestataireDetailPage implements OnInit {
       if (this.apiSlots.length) {
         const first = this.apiSlots[0];
         const last = this.apiSlots[this.apiSlots.length - 1];
-        return this.enumerateTimes(first, this.addMinutes(last, this.stepMin), this.stepMin);
+        return this.enumerateTimes(first, this.addMinutes(last, this.gridStep()), this.gridStep());
       }
       return [];
     }
 
     // fusionne les fenêtres (au cas où il y en ait plusieurs)
     const grid: string[] = [];
+    const step = this.gridStep();
     windows.forEach(w => {
-      grid.push(...this.enumerateTimes(w.start, w.end, this.stepMin));
+      grid.push(...this.enumerateTimes(w.start, w.end, step));
     });
     // déduplique en conservant l’ordre
     return Array.from(new Set(grid));
@@ -282,25 +279,16 @@ export class PrestataireDetailPage implements OnInit {
 
   // Met à jour la logique de masquage selon la durée (pas de state à garder — tout est calculé dans isStartReservable)
   recomputeGridMask() {
-    // rien à stocker : on recalculera à la volée via isStartReservable / slotClasses
+    this.loadSlots();
   }
 
   // Un début est réservable si:
   //  - il n’est pas dans le passé
-  //  - il est présent dans apiSlots
-  //  - et toutes les cases suivantes couvrant la durée sont aussi dans apiSlots
-  //  - et il ne dépasse pas la fenêtre d’ouverture
+  //  - il est explicitement renvoyé par l’API (Set apiSlots)
+  //  - et la fin reste dans une fenêtre d’ouverture
   isStartReservable(hhmm: string): boolean {
     if (this.isPastSlot(hhmm)) return false;
     if (!this.apiSlotsSet.has(hhmm)) return false;
-
-    const needed = Math.ceil(this.dureeMin / this.stepMin);
-    for (let i = 0; i < needed; i++) {
-      const t = this.addMinutes(hhmm, i * this.stepMin);
-      if (!this.apiSlotsSet.has(t)) return false; // une case manque → chevauchement/indispo
-      if (!this.isInsideWindows(t)) return false; // hors ouverture
-    }
-    // vérifie aussi que la fin tombe encore à l’intérieur
     const end = this.addMinutes(hhmm, this.dureeMin);
     if (!this.isInsideWindows(end, true)) return false;
 
@@ -366,6 +354,18 @@ export class PrestataireDetailPage implements OnInit {
     return this.fromMinutes(this.toMinutes(hhmm) + delta);
   }
 
+  private updateGridMask() {
+    this.grid = this.buildDayGrid();
+    if (this.heureDebut && !this.isStartReservable(this.heureDebut)) {
+      this.heureDebut = null;
+    }
+  }
+
+  private gridStep(): number {
+    const effectiveStep = (this.stepMin && this.stepMin > 0) ? this.stepMin : this.gridBaseStep;
+    return Math.min(this.gridBaseStep, effectiveStep);
+  }
+
   /* ---------- Past / Reserve ---------- */
   isPastSlot(hhmm: string): boolean {
     const now = new Date();
@@ -411,7 +411,8 @@ export class PrestataireDetailPage implements OnInit {
       serviceId: this.serviceId as (number|string),
       prestataireId: this.id,
       date: this.date,
-      heure: this.heureDebut as string
+      heure: this.heureDebut as string,
+      dureeMin: this.dureeMin
     };
 
     this.loading = true;

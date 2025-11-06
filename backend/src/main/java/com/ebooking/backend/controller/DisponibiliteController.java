@@ -60,11 +60,12 @@ public class DisponibiliteController {
             @PathVariable Long prestataireId,
             @RequestParam String date,               // YYYY-MM-DD (requis)
             @RequestParam(required = false) Long serviceId, // optionnel
-            @RequestParam(required = false) Integer step    // minutes (par défaut 30)
+            @RequestParam(required = false) Integer step,   // minutes (par défaut 30)
+            @RequestParam(required = false) Integer dureeMin
     ) {
         if (date == null || date.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Paramètre 'date' requis (YYYY-MM-DD)");
         }
-        return ResponseEntity.ok(dispoService.slotsForDate(prestataireId, serviceId, date, step));
+        return ResponseEntity.ok(dispoService.slotsForDate(prestataireId, serviceId, date, step, dureeMin));
     }
 }

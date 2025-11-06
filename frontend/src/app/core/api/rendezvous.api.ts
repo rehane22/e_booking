@@ -21,6 +21,7 @@ export type CreateRdvPayload = {
   prestataireId: number|string;
   date: string;   // YYYY-MM-DD
   heure: string;  // HH:mm
+  dureeMin?: number;
 };
 
 export type UpdateRdvPayload = Partial<{

@@ -35,6 +35,8 @@ public class RendezVous {
     private LocalDate date;
     @Column(name = "heure_rdv", nullable = false)
     private LocalTime heure;
+    @Column(name = "duree_minutes")
+    private Integer dureeMinutes;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
     private StatutRdv statut = StatutRdv.EN_ATTENTE;

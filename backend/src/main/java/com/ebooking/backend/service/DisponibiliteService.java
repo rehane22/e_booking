@@ -11,5 +11,5 @@ public interface DisponibiliteService {
     DisponibiliteResponse create(Long currentUserId, DisponibiliteRequest req);
     DisponibiliteResponse update(Long currentUserId, Long dispoId, DisponibiliteUpdateRequest req);;
     void delete(Long currentUserId, Long dispoId);
-    List<String> slotsForDate(Long prestataireId, Long serviceId, String dateIso, Integer stepMinutes);
+    List<String> slotsForDate(Long prestataireId, Long serviceId, String dateIso, Integer stepMinutes, Integer dureeMinutes);
 }
