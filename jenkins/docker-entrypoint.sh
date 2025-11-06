@@ -19,6 +19,7 @@ if [ -S /var/run/docker.sock ]; then
     fi
 
     usermod -aG "$TARGET_GROUP" jenkins || true
+    chmod 666 /var/run/docker.sock || true
 fi
 
 chown -R jenkins:jenkins /var/jenkins_home
