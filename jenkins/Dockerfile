@@ -5,9 +5,9 @@ USER root
 ARG DOCKER_CLI_VERSION=27.2.0
 ARG DOCKER_COMPOSE_VERSION=2.27.0
 
-# Install Docker CLI (binaire statique) et Docker Compose
+# Installer Docker CLI (binaire statique) + Docker Compose + gosu
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends curl ca-certificates tar \
+    && apt-get install -y --no-install-recommends curl ca-certificates tar gosu \
     && curl -SL "https://download.docker.com/linux/static/stable/$(uname -m)/docker-${DOCKER_CLI_VERSION}.tgz" \
         | tar -xz --strip-components=1 -C /usr/local/bin docker/docker \
     && mkdir -p /usr/local/lib/docker/cli-plugins \
@@ -16,8 +16,7 @@ RUN apt-get update \
     && chmod +x /usr/local/bin/docker /usr/local/lib/docker/cli-plugins/docker-compose \
     && rm -rf /var/lib/apt/lists/*
 
-# Ajouter l'utilisateur Jenkins au groupe docker (crée si besoin)
-RUN groupadd -f docker \
-    && usermod -aG docker jenkins
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-USER jenkins
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
