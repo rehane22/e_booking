@@ -1,0 +1,76 @@
+services:
+  backend:
+    build: ./backend
+    container_name: ebooking-backend
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/ebooking
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: change-me
+    depends_on:
+      - db
+    networks:
+      - ebooking-net
+
+  frontend:
+    build: ./frontend
+    container_name: ebooking-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - ebooking-net
+
+  db:
+    image: postgres:16-alpine
+    container_name: ebooking-db
+    environment:
+      POSTGRES_DB: ebooking
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - ebooking-net
+
+  pgadmin:
+    image: dpage/pgadmin4:8.12
+    container_name: ebooking-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: rehanemigan@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - ebooking-net
+
+  jenkins:
+    build: ./jenkins
+    container_name: ebooking-jenkins
+    user: jenkins
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    environment:
+      JAVA_OPTS: -Djenkins.install.runSetupWizard=false
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - ebooking-net
+
+volumes:
+  postgres-data:
+  pgadmin-data:
+  jenkins-data:
+
+networks:
+  ebooking-net:
+    driver: bridge
