@@ -37,7 +37,7 @@
    - Enregistre, puis effectue un `git push` pour vérifier que Jenkins reçoit la notification.
 
 4. **Vérifier l’accès Docker**  
-   - Les étapes backend et frontend utilisent les images `maven:3.9.6-eclipse-temurin-17` et `node:20-bullseye`.  
+   - Les étapes backend et frontend utilisent les images `maven:3.9-eclipse-temurin-17` et `node:20-bullseye`.  
    - Assure-toi que l’utilisateur Jenkins peut exécuter `docker ps` et que les caches (`$HOME/.m2`, `$HOME/.npm`) sont accessibles en écriture.
 
 5. **(Optionnel) Pousser les images**  
