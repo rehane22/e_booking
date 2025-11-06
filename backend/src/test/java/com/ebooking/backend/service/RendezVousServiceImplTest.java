@@ -76,10 +76,10 @@ class RendezVousServiceImplTest {
                 .user(User.builder().id(99L).build())
                 .build();
 
-        when(userRepository.findById(CLIENT_ID)).thenReturn(Optional.of(client));
-        when(serviceRepository.findById(SERVICE_ID)).thenReturn(Optional.of(serviceCatalog));
-        when(prestataireRepository.findById(PRESTATAIRE_ID)).thenReturn(Optional.of(prestataire));
-        when(prestataireServiceRepository.existsByPrestataireIdAndServiceId(PRESTATAIRE_ID, SERVICE_ID)).thenReturn(true);
+        lenient().when(userRepository.findById(CLIENT_ID)).thenReturn(Optional.of(client));
+        lenient().when(serviceRepository.findById(SERVICE_ID)).thenReturn(Optional.of(serviceCatalog));
+        lenient().when(prestataireRepository.findById(PRESTATAIRE_ID)).thenReturn(Optional.of(prestataire));
+        lenient().when(prestataireServiceRepository.existsByPrestataireIdAndServiceId(PRESTATAIRE_ID, SERVICE_ID)).thenReturn(true);
 
         Disponibilite slot = Disponibilite.builder()
                 .prestataire(prestataire)
@@ -87,20 +87,20 @@ class RendezVousServiceImplTest {
                 .heureDebut(LocalTime.of(8, 0))
                 .heureFin(LocalTime.of(12, 0))
                 .build();
-        when(disponibiliteRepository.findCoveringSlot(
+        lenient().when(disponibiliteRepository.findCoveringSlot(
                 eq(PRESTATAIRE_ID),
                 eq(JourSemaine.LUNDI),
                 eq(SERVICE_ID),
                 eq(HEURE)
         )).thenReturn(List.of(slot));
 
-        when(rdvRepository.findByPrestataireIdAndDateAndStatutIn(
+        lenient().when(rdvRepository.findByPrestataireIdAndDateAndStatutIn(
                 eq(PRESTATAIRE_ID),
                 eq(DATE),
                 anyList()
         )).thenReturn(Collections.emptyList());
 
-        when(rdvRepository.save(any(RendezVous.class))).thenAnswer(invocation -> {
+        lenient().when(rdvRepository.save(any(RendezVous.class))).thenAnswer(invocation -> {
             RendezVous rdv = invocation.getArgument(0);
             rdv.setId(42L);
             return rdv;
@@ -185,8 +185,8 @@ class RendezVousServiceImplTest {
                 .build();
 
         when(rdvRepository.findByPrestataireIdAndDateAndStatutIn(
-                PRESTATAIRE_ID,
-                DATE,
+                eq(PRESTATAIRE_ID),
+                eq(DATE),
                 anyList()
         )).thenReturn(List.of(existing));
 
