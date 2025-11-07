@@ -7,41 +7,7 @@ import { RouterModule, Router } from '@angular/router';
   selector: 'app-topbar',
   standalone: true,
   imports: [CommonModule, RouterModule,],
-  template: `
-  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-black/5">
-    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-      <button routerLink="/" class="flex items-center gap-2">
-        <div class="h-9 w-9 rounded-xl bg-primary text-white grid place-items-center font-bold">E</div>
-        <span class="font-semibold text-base">E-Booking</span>
-      </button>
-
-      @if (!isLoggedIn()) {
-        <div class="flex gap-2">
-          <button routerLink="/auth/login" class="btn-ghost h-10 px-4">Se connecter</button>
-          <button routerLink="/auth/register" class="btn-primary h-10 px-4">Créer un compte</button>
-        </div>
-      } @else {
-        <nav class="hidden md:flex items-center gap-2">
-
-          @if (has('CLIENT')) { <button routerLink="/services" class="btn-ghost h-10 px-3">Catalogue</button> }
-          @if (has('PRO'))    { <button routerLink="/pro" class="btn-ghost h-10 px-3">Espace Pro</button> }
-          @if (has('ADMIN'))  { <button routerLink="/admin/dashboard" class="btn-ghost h-10 px-3">Admin</button> }
-          <button routerLink="/mon-compte" class="btn-primary h-10 px-4">  
-         <svg fill="#fff" width="15px" height="15px" viewBox="0 0 30 30" id="_03_-_Account" data-name="03 - Account" xmlns="http://www.w3.org/2000/svg">
-          <path id="Path_217" data-name="Path 217" d="M16,1a8,8,0,1,0,8,8A8,8,0,0,0,16,1Zm0,2a6,6,0,1,1-6,6A6,6,0,0,1,16,3Z" transform="translate(-1 -1)" fill-rule="evenodd"/>
-          <path id="Path_218" data-name="Path 218" d="M16,19.2c-5.657,0-10.558,1.175-13,2.82A3.865,3.865,0,0,0,1,25.1a3.865,3.865,0,0,0,2,3.08C5.442,29.825,10.343,31,16,31s10.558-1.175,13-2.82a3.865,3.865,0,0,0,2-3.08,3.865,3.865,0,0,0-2-3.08C26.558,20.375,21.657,19.2,16,19.2Zm0,2a26.973,26.973,0,0,1,10.867,1.909,5.8,5.8,0,0,1,1.694,1.132,1.06,1.06,0,0,1,0,1.718,5.8,5.8,0,0,1-1.694,1.132A26.973,26.973,0,0,1,16,29,26.973,26.973,0,0,1,5.133,27.091a5.8,5.8,0,0,1-1.694-1.132,1.06,1.06,0,0,1,0-1.718,5.8,5.8,0,0,1,1.694-1.132A26.973,26.973,0,0,1,16,21.2Z" transform="translate(-1 -1)" fill-rule="evenodd"/>
-          </svg>
-        </button>
-          
-
-          <button class="btn-primary h-10 px-4" (click)="logout()">Déconnexion</button>
-        </nav>
-
-       
-      }
-    </div>
-  </header>
-  `
+  templateUrl: './topbar.html',
 })
 export class TopbarComponent {
   private router = inject(Router);

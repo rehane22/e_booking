@@ -1,1 +1,119 @@
-<p>rendezvous works!</p>
+<div class="max-w-5xl mx-auto space-y-6">
+    <div class="flex items-center justify-between mt-4">
+      <h1 class="text-2xl font-semibold">Mes rendez-vous pros</h1>
+      <button routerLink="/pro" class="btn-ghost h-10">← Dashboard</button>
+    </div>
+
+    <!-- Filtres -->
+    <form [formGroup]="filters" (ngSubmit)="apply()" class="card p-6 flex flex-wrap gap-3 items-end">
+      <div>
+        <label class="text-xs">Date</label>
+        <input type="date" class="input" formControlName="date">
+      </div>
+      <div>
+        <label class="text-xs">Statut</label>
+        <select class="input" formControlName="statut">
+          <option [ngValue]="''">Tous</option>
+          <option [ngValue]="'EN_ATTENTE'">En attente</option>
+          <option [ngValue]="'CONFIRME'">Confirmé</option>
+          <option [ngValue]="'ANNULE'">Annulé</option>
+          <option [ngValue]="'REFUSE'">Refusé</option>
+        </select>
+      </div>
+      <button class="btn-ghost h-10" type="submit">Filtrer</button>
+      <button class="btn-ghost h-10" type="button" (click)="clear()">Réinitialiser</button>
+    </form>
+
+    <!-- À venir -->
+    <div class="card p-6">
+      <h3 class="font-semibold mb-3">À venir</h3>
+      <div class="space-y-3">
+        @for (r of futurs; track r.id) {
+          <div class="p-4 rounded-2xl border border-black/10">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="font-medium">{{ r.serviceNom }}</div>
+                <div class="text-sm text-black/70">
+                  {{ r.dateLabel }} — {{ r.heure }} → {{ r.heureFin }} · {{ r.clientNom }}
+                </div>
+                <span class="badge mt-2" [ngClass]="r.badgeClass">{{ labelStatut(r.statut) }}</span>
+              </div>
+
+              <!-- Actions contextuelles -->
+              <div class="flex gap-2 shrink-0">
+                <!-- Confirmer uniquement si EN_ATTENTE -->
+                @if (r.statut === 'EN_ATTENTE') {
+                  <button class="btn-ghost h-9" (click)="confirmer(r)">Confirmer</button>
+                }
+
+                <!-- Refuser (PRO) si non annulé/refusé -->
+                @if (r.statut !== 'ANNULE' && r.statut !== 'REFUSE') {
+                  <button class="btn-ghost h-9 text-red-600" (click)="refuser(r)">Refuser</button>
+                }
+
+                <!-- Modifier si non annulé/refusé -->
+                @if (r.statut !== 'ANNULE' && r.statut !== 'REFUSE') {
+                  <button class="btn-ghost h-9" (click)="toggleEdit(r)">Modifier</button>
+                }
+              </div>
+            </div>
+
+            <!-- Panneau édition -->
+            @if (editingId===r.id) {
+              <form class="mt-3 grid sm:grid-cols-5 gap-3 items-end" (ngSubmit)="saveEdit(r)">
+                <div class="sm:col-span-2">
+                  <label class="text-xs">Date</label>
+                  <input class="input" type="date" [(ngModel)]="edit.date" name="date">
+                </div>
+                <div class="">
+                  <label class="text-xs">Heure</label>
+                  <input class="input" type="time" [(ngModel)]="edit.heure" name="heure">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="text-xs">Service</label>
+                  <select class="input" [(ngModel)]="edit.serviceId" name="serviceId">
+                    <option *ngFor="let s of services" [ngValue]="s.id">{{ s.nom }}</option>
+                  </select>
+                </div>
+                <div class="sm:col-span-5 flex gap-2">
+                  <button class="btn-primary h-10" type="submit" [disabled]="!canSaveEdit()">Enregistrer</button>
+                  <button class="btn-ghost h-10" type="button" (click)="cancelEdit()">Annuler</button>
+                </div>
+              </form>
+            }
+          </div>
+        } @empty {
+          <div class="text-sm text-muted">Aucun rendez-vous à venir.</div>
+        }
+      </div>
+    </div>
+
+    <!-- Passés (repliables) -->
+    <div class="card p-6">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold">Passés</h3>
+        <button class="btn-ghost h-9" (click)="pastOpen=!pastOpen">
+          {{ pastOpen ? 'Masquer' : 'Afficher' }}
+        </button>
+      </div>
+      @if (pastOpen) {
+        <div class="space-y-3 mt-3">
+          @for (r of passes; track r.id) {
+            <div class="p-4 rounded-2xl border border-black/10">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="font-medium">{{ r.serviceNom }}</div>
+                  <div class="text-sm text-black/70">
+                    {{ r.dateLabel }} — {{ r.heure }} → {{ r.heureFin }} · {{ r.clientNom }}
+                  </div>
+                  <span class="badge mt-2" [ngClass]="r.badgeClass">{{ labelStatut(r.statut) }}</span>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="text-sm text-muted">Aucun historique.</div>
+          }
+        </div>
+      }
+    </div>
+  </div>
