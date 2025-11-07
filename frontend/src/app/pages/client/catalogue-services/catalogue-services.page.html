@@ -4,7 +4,6 @@
     </div>
 
     <div class="grid md:grid-cols-3 gap-6 mt-6">
-      <!-- ===== Colonne gauche : FILTRES + SERVICES (scroll interne) ===== -->
       <aside class="md:col-span-1">
         <div class="card p-4 h-[calc(100vh-160px)] flex flex-col">
           <div class="space-y-3">
@@ -47,8 +46,6 @@
           </div>
         </div>
       </aside>
-
-      <!-- ===== Colonne droite : RÉSULTATS (scroll interne) ===== -->
       <section class="md:col-span-2">
         <div class="card p-4 h-[calc(100vh-160px)] flex flex-col">
 
@@ -69,7 +66,7 @@
             <div class="grid lg:grid-cols-2 gap-3">
               @for (p of visiblePros(); track p.id) {
                 <div class="p-3 rounded-2xl border flex gap-3 items-center">
-                  <!-- Avatar initiales -->
+  
                   <div class="h-16 w-16 rounded-xl grid place-items-center text-white font-semibold"
                        [ngClass]="avatarBg(p.id)">
                     {{ initials(p.nomAffiche) }}

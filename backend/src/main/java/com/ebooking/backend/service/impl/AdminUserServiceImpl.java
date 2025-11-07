@@ -22,10 +22,12 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AdminUserItemResponse> list(String query, String statusStr, int page, int size, String sort) {
+    public Page<AdminUserItemResponse> list(String query, String statusStr, String roleStr, String excludeRoleStr, int page, int size, String sort) {
         Pageable pageable = PageRequest.of(page, size, parseSort(sort));
         UserStatus status = parseStatus(statusStr);
-        var p = userRepo.searchAdmin(query, status, pageable);
+        Role role = parseRole(roleStr);
+        Role excludeRole = parseRole(excludeRoleStr);
+        var p = userRepo.searchAdmin(query, status, role, excludeRole, pageable);
         return p.map(this::toItem);
     }
 
@@ -54,8 +56,8 @@ public class AdminUserServiceImpl implements AdminUserService {
         return new AdminUserItemResponse(
                 u.getId(), u.getPrenom(), u.getNom(), u.getEmail(),
                 u.getRoles().stream()
-                        .map(ur -> ur.getRole())      // UserRole -> Role
-                        .map(Role::name)              // Role -> String
+                        .map(ur -> ur.getRole())     
+                        .map(Role::name)             
                         .collect(Collectors.toList()),
                 u.getStatut().name(), u.getCreatedAt(), u.getLastLoginAt()
         );
@@ -65,8 +67,8 @@ public class AdminUserServiceImpl implements AdminUserService {
         return new AdminUserDetailResponse(
                 u.getId(), u.getPrenom(), u.getNom(), u.getEmail(), u.getTelephone(),
                 u.getRoles().stream()
-                        .map(ur -> ur.getRole())      // UserRole -> Role
-                        .map(Role::name)              // Role -> String
+                        .map(ur -> ur.getRole())     
+                        .map(Role::name)             
                         .collect(Collectors.toList()),
                 u.getStatut().name(), u.getCreatedAt(), u.getLastLoginAt()
         );
@@ -83,5 +85,10 @@ public class AdminUserServiceImpl implements AdminUserService {
     private UserStatus parseStatus(String s) {
         if (s == null || s.equalsIgnoreCase("ALL")) return null;
         try { return UserStatus.valueOf(s); } catch (Exception e) { return null; }
+    }
+
+    private Role parseRole(String s) {
+        if ( s == null || s.equalsIgnoreCase("ALL") ) return null;
+        try { return Role.valueOf(s); } catch (Exception e) { return null; }
     }
 }

@@ -13,7 +13,6 @@ export const proProfileGuard: CanMatchFn = () => {
       if (e?.status === 404) {
         return of(router.createUrlTree(['/pro/onboarding']) as unknown as UrlTree);
       }
-      // autre erreur : on bloque et renvoie au dashboard pro
       return of(router.createUrlTree(['/pro']) as unknown as UrlTree);
     })
   );

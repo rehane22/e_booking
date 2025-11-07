@@ -30,12 +30,12 @@ export class UserDetailPage implements OnInit {
   id!: number;
   user?: AdminUserDetail;
 
-  // Profil
+
   form = { prenom: '', nom: '', telephone: '' };
   saving = false; deleting = false;
   saveOk = false; saveError = '';
 
-  // RDV
+
   filters = this.fb.group({ date: [''], statut: [''] });
   loadingRdv = false;
   rdvs: RowVM[] = [];
@@ -155,7 +155,7 @@ export class UserDetailPage implements OnInit {
     });
   }
 
-  // Optionnel : si tu autorises l’admin à annuler
+
   cancel(r: RowVM) {
     if (r.statut === 'ANNULE') return;
     if (!confirm('Confirmer l’annulation de ce rendez-vous ?')) return;
@@ -166,7 +166,7 @@ export class UserDetailPage implements OnInit {
     });
   }
 
-  // --- Utils d’affichage ---
+
   formatFr(isoDate: string) {
     const d = new Date(isoDate + 'T00:00:00');
     return new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(d);

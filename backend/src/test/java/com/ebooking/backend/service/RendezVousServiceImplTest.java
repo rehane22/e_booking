@@ -54,7 +54,7 @@ class RendezVousServiceImplTest {
     private static final Long CLIENT_ID = 1L;
     private static final Long SERVICE_ID = 2L;
     private static final Long PRESTATAIRE_ID = 3L;
-    private static final LocalDate DATE = LocalDate.of(2025, 1, 13); // Lundi
+    private static final LocalDate DATE = LocalDate.of(2025, 1, 13);
     private static final LocalTime HEURE = LocalTime.of(10, 0);
 
     private User client;
@@ -278,6 +278,47 @@ class RendezVousServiceImplTest {
                     .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
 
             verify(rdvRepository, never()).findByClientIdOrderByDateAscHeureAsc(anyLong());
+        }
+    }
+
+    @Nested
+    class RefuserTests {
+
+        @Test
+        @DisplayName("refuser() lève une erreur lorsqu'un rendez-vous déjà confirmé est refusé")
+        void refuserShouldFailWhenRdvAlreadyConfirmed() {
+            long rdvId = 555L;
+            RendezVous rdv = RendezVous.builder()
+                    .id(rdvId)
+                    .service(serviceCatalog)
+                    .prestataire(prestataire)
+                    .client(client)
+                    .statut(StatutRdv.CONFIRME)
+                    .build();
+            when(rdvRepository.findById(rdvId)).thenReturn(Optional.of(rdv));
+
+            assertThatThrownBy(() -> service.refuser(prestataire.getUser().getId(), rdvId))
+                    .isInstanceOf(UnprocessableEntityException.class)
+                    .hasMessageContaining("Impossible de refuser");
+        }
+
+        @Test
+        @DisplayName("refuser() fait passer un rendez-vous en attente au statut REFUSE")
+        void refuserShouldTransitionPendingRdvToRefuse() {
+            long rdvId = 556L;
+            RendezVous rdv = RendezVous.builder()
+                    .id(rdvId)
+                    .service(serviceCatalog)
+                    .prestataire(prestataire)
+                    .client(client)
+                    .statut(StatutRdv.EN_ATTENTE)
+                    .build();
+            when(rdvRepository.findById(rdvId)).thenReturn(Optional.of(rdv));
+
+            RendezVousResponse response = service.refuser(prestataire.getUser().getId(), rdvId);
+
+            assertThat(response.statut()).isEqualTo(StatutRdv.REFUSE.name());
+            assertThat(rdv.getStatut()).isEqualTo(StatutRdv.REFUSE);
         }
     }
 }

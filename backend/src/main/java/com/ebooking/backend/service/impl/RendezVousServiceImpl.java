@@ -119,7 +119,7 @@ public class RendezVousServiceImpl implements RendezVousService {
             throw new AccessDeniedException("Seul le client, le prestataire ou un admin peut annuler");
         }
         if (rdv.getStatut() == StatutRdv.ANNULE)
-            return toResp(rdv); // idempotent
+            return toResp(rdv); 
         rdv.setStatut(StatutRdv.ANNULE);
         return toResp(rdv);
     }
@@ -133,6 +133,9 @@ public class RendezVousServiceImpl implements RendezVousService {
             throw new AccessDeniedException("Seul le prestataire ou un admin peut refuser");
         }
         if (rdv.getStatut() == StatutRdv.REFUSE || rdv.getStatut() == StatutRdv.ANNULE) return toResp(rdv);
+        if (rdv.getStatut() != StatutRdv.EN_ATTENTE) {
+            throw new UnprocessableEntityException("Impossible de refuser un rendez-vous confirmé. Veuillez l'annuler.");
+        }
         rdv.setStatut(StatutRdv.REFUSE);
         return toResp(rdv);
     }
@@ -143,7 +146,7 @@ public class RendezVousServiceImpl implements RendezVousService {
         boolean isPrestataire = Objects.equals(rdv.getPrestataire().getUser().getId(), currentUserId);
         boolean isAdmin = CurrentUser.hasRole("ADMIN");
         if (!isPrestataire && !isAdmin)
-            throw new AccessDeniedException("Seul le prestataire ou un admin peut modifier"); // déduire nouvelles valeur
+            throw new AccessDeniedException("Seul le prestataire ou un admin peut modifier"); 
         ServiceCatalog service = rdv.getService();
         if (req.serviceId() != null) {
             service = serviceRepo.findById(req.serviceId()).orElseThrow(() -> new EntityNotFoundException("Service introuvable"));
@@ -168,7 +171,7 @@ public class RendezVousServiceImpl implements RendezVousService {
         }
         rdv.setService(service);
         rdv.setDate(date);
-        rdv.setHeure(heure); // Optionnel: repasser en EN_ATTENTE si déjà confirmé
+        rdv.setHeure(heure); 
         if (rdv.getDureeMinutes() == null || rdv.getDureeMinutes() <= 0) {
             rdv.setDureeMinutes(duree);
         }

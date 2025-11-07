@@ -18,7 +18,7 @@ export class DashboardPage implements OnInit {
   loading = true;
   error = '';
 
-  // KPIs
+
   todayCount = 0;
   upcomingCount = 0;
   pastCount = 0;
@@ -40,7 +40,7 @@ export class DashboardPage implements OnInit {
 
   /* ---- Data ---- */
   private loadKpis() {
-    // On récupère tous les RDV du pro (sans filtre date côté API).
+
     this.rdvApi.listByPrestataire(this.me.id).subscribe({
            
       next: (list) => {
@@ -65,7 +65,7 @@ export class DashboardPage implements OnInit {
 
     for (const r of list) {
       if (r.date === todayISO) {
-        // même jour : compare heure
+        
         if (r.heure >= nowHm) { today++; } else { past++; }
       } else if (r.date > todayISO) {
         upcoming++;
@@ -80,7 +80,7 @@ export class DashboardPage implements OnInit {
   }
 
   private pickNext(list: Rdv[]): Rdv | null {
-    // prochain RDV (>= maintenant), tri date + heure
+  
     const now = new Date();
     const todayISO = now.toISOString().slice(0,10);
     const nowHm = now.toTimeString().slice(0,5);

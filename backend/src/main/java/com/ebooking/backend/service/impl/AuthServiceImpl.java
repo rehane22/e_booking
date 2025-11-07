@@ -28,15 +28,12 @@ public class AuthServiceImpl implements com.ebooking.backend.service.AuthService
 
     @Override
     public AuthResponse register(RegisterRequest req) {
-        // validations uniques
         if (userRepo.existsByEmailIgnoreCase(req.email())) {
             throw new EntityExistsException("Email déjà utilisé");
         }
         if (userRepo.existsByTelephone(req.telephone())) {
             throw new EntityExistsException("Téléphone déjà utilisé");
         }
-
-        // créer user
         User user = User.builder()
                 .prenom(req.prenom().trim())
                 .nom(req.nom().trim())
@@ -46,8 +43,6 @@ public class AuthServiceImpl implements com.ebooking.backend.service.AuthService
                 .statut(UserStatus.ACTIF)
                 .build();
         user = userRepo.save(user);
-
-        // rôles: CLIENT (+ PRO si isPro)
         UserRole rClient = UserRole.builder().user(user).role(Role.CLIENT).build();
         roleRepo.save(rClient);
         if (req.isPro()) {
@@ -55,14 +50,12 @@ public class AuthServiceImpl implements com.ebooking.backend.service.AuthService
             roleRepo.save(rPro);
         }
 
-        // Recharger les rôles pour le token
+       
         user.setRoles(roleRepo.findByUserId(user.getId()));
 
         String token = jwtTokenService.generateAccessToken(user);
         List<String> roles = user.getRoles().stream().map(ur -> ur.getRole().name()).toList();
-
-        // expiresIn: lis des properties via JwtTokenService? on le duplique pas; on renvoie la même valeur
-        long expiresIn = jwtTokenService.getExpiresInSeconds();   // <-- ici
+        long expiresIn = jwtTokenService.getExpiresInSeconds();
         return AuthResponse.of(user.getId(), user.getEmail(), roles, token, expiresIn);
     }
 

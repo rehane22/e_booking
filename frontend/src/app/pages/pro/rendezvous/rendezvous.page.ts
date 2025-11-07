@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { RendezVousApi, Rdv, RdvStatut } from '../../../core/api/rendezvous.api';
 import { PrestataireApi, PrestataireMe } from '../../../core/api/prestataire.api';
 
-type RowVM = Rdv & { // VM: formatages UI
+type RowVM = Rdv & { 
   dateLabel: string;
   heureFin: string;
   badgeClass: string;
@@ -31,7 +31,7 @@ export class RendezvousPage implements OnInit {
   passes: RowVM[] = [];
   pastOpen = false;
 
-  // edition inline
+
   editingId: string|number|null = null;
   edit: { date: string; heure: string; serviceId: number|string|null } = { date: '', heure: '', serviceId: null };
 
@@ -49,7 +49,7 @@ export class RendezvousPage implements OnInit {
   load() {
     const qDate = this.filters.value.date || undefined;
     this.api.listByPrestataire(this.me.id, qDate as string|undefined).subscribe(list => {
-      // map → VM + format FR + heure fin
+
       const now = new Date();
       const todayStr = now.toISOString().slice(0,10);
 
@@ -61,10 +61,10 @@ export class RendezvousPage implements OnInit {
           const heureFin = this.addMinutes(r.date, r.heure, duree);
           return { ...r, dateLabel, heureFin, badgeClass: this.badgeClass(r.statut) };
         })
-        // tri: d'abord date croissante + heure croissante
+     
         .sort((a,b) => a.date.localeCompare(b.date) || a.heure.localeCompare(b.heure));
 
-      // split futurs / passés
+
       const [fut, pas] = [[], []] as [RowVM[], RowVM[]];
       for (const r of mapped) {
         if (r.date > todayStr || (r.date === todayStr && r.heure >= now.toTimeString().slice(0,5))) fut.push(r);
@@ -76,7 +76,7 @@ export class RendezvousPage implements OnInit {
     });
   }
 
-  /* -------- Actions -------- */
+
   confirmer(r: RowVM) {
     this.api.confirmer(r.id).subscribe({
       next: nr => { r.statut = nr.statut; r.badgeClass = this.badgeClass(r.statut); this.load(); },
@@ -89,6 +89,14 @@ export class RendezvousPage implements OnInit {
     this.api.refuser(r.id).subscribe({
       next: nr => { r.statut = nr.statut; r.badgeClass = this.badgeClass(r.statut); this.load(); },
       error: e => alert('Refus impossible: ' + (e.error?.message ?? e.status))
+    });
+  }
+
+  annuler(r: RowVM) {
+    if (!confirm('Annuler ce rendez-vous confirmé ?')) return;
+    this.api.annuler(r.id).subscribe({
+      next: nr => { r.statut = nr.statut; r.badgeClass = this.badgeClass(r.statut); this.load(); },
+      error: e => alert('Annulation impossible: ' + (e.error?.message ?? e.status))
     });
   }
 
@@ -113,7 +121,7 @@ export class RendezvousPage implements OnInit {
   }
   cancelEdit() { this.editingId = null; this.edit = { date: '', heure: '', serviceId: null }; }
 
-  /* -------- Helpers -------- */
+
   formatFr(isoDate: string) {
     const d = new Date(isoDate + 'T00:00:00');
     return new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(d);

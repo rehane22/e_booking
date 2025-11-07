@@ -32,7 +32,7 @@ export class MonComptePage implements OnInit {
   saveOk = false;
   saveError = '';
 
-  // RDV (version “pro-like”)
+
   filters = this.fb.group({ date: [''], statut: [''] });
   rdvs: RowVM[] = [];
   futurs: RowVM[] = [];
@@ -52,7 +52,7 @@ export class MonComptePage implements OnInit {
       next: (u) => {
         this.me = u;
         this.form = { prenom: u.prenom ?? '', nom: u.nom ?? '', telephone: u.telephone ?? '' };
-        this.loadRdvs(); // charge + map + split
+        this.loadRdvs();
       },
       error: () => { this.saveError = 'Impossible de charger ton profil (connecte-toi).'; }
     });
@@ -99,7 +99,6 @@ export class MonComptePage implements OnInit {
 
   this.rdvApi.listByClient(this.me.id).subscribe({
     next: (items) => {
-      // filtrage front par date + statut
       const filtered = items.filter(r =>
         (dateFilter ? r.date === dateFilter : true) &&
         (statutFilter ? r.statut === statutFilter : true)
@@ -108,7 +107,7 @@ export class MonComptePage implements OnInit {
       const mapped = filtered
         .map(r => {
           const dateLabel = this.formatFr(r.date);
-          const duree = (r as any).serviceDureeMin ?? 60; // fallback 60'
+          const duree = (r as any).serviceDureeMin ?? 60; 
           const heureFin = this.addMinutes(r.date, r.heure, duree);
           const badgeClass = this.badgeClass(r.statut);
           const serviceLabel = (r as any).serviceNom ?? 'Prestation';
@@ -117,7 +116,7 @@ export class MonComptePage implements OnInit {
         })
         .sort((a,b) => a.date.localeCompare(b.date) || a.heure.localeCompare(b.heure));
 
-      // split futurs / passés
+   
       const now = new Date();
       const todayStr = now.toISOString().slice(0,10);
       const nowHm = now.toTimeString().slice(0,5);

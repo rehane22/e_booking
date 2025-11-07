@@ -5,8 +5,8 @@ public record RendezVousResponse(
         Long serviceId,
         Long prestataireId,
         Long clientId,
-        String date, // "YYYY-MM-DD"
-        String heure, // "HH:mm"
-        String statut, // EN_ATTENTE | CONFIRME | ANNULE | REFUSE
-        Integer dureeMin // optionnel si ServiceCatalog possède dureeMin
+        String date, 
+        String heure, 
+        String statut, 
+        Integer dureeMin 
 ) { }

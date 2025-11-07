@@ -24,7 +24,7 @@ public class Disponibilite {
             foreignKey = @ForeignKey(name = "fk_dispos_prestataire"))
     private Prestataire prestataire;
 
-    // NULL = créneau général (valable pour tous les services proposés par ce prestataire)
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_id",
             foreignKey = @ForeignKey(name = "fk_dispos_service"))

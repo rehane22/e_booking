@@ -26,18 +26,18 @@ public class AdminStatsServiceImpl implements AdminStatsService {
     @Override
     public StatsSummaryResponse summary(LocalDate from, LocalDate to) {
         long totalUsers   = userRepo.count();
-        long activeUsers  = userRepo.searchAdmin(null, UserStatus.ACTIF, Pageable.unpaged()).getTotalElements();
-        long blockedUsers = userRepo.searchAdmin(null, UserStatus.BLOQUE, Pageable.unpaged()).getTotalElements();
+        long activeUsers  = userRepo.searchAdmin(null, UserStatus.ACTIF, null, null, Pageable.unpaged()).getTotalElements();
+        long blockedUsers = userRepo.searchAdmin(null, UserStatus.BLOQUE, null, null, Pageable.unpaged()).getTotalElements();
 
         long totalRdv = rdvRepo.countByDateBetween(from, to);
         long todayRdv = rdvRepo.countByDate(LocalDate.now());
 
-        // Occupancy rate (approx) : RDV / slots potentiels * 100
-        long potentialSlots = countPotentialSlots(from, to, 30); // step 30 min
+     
+        long potentialSlots = countPotentialSlots(from, to, 30); 
         double occupancy = potentialSlots == 0 ? 0d : Math.min(100d, (totalRdv * 100.0) / potentialSlots);
 
-        // Lead time moyen : nécessite RendezVous.createdAt (sinon null)
-        Double avgLead = null; // à implémenter si tu ajoutes createdAt
+       
+        Double avgLead = null;
 
         return new StatsSummaryResponse(from.toString(), to.toString(),
                 totalUsers, activeUsers, blockedUsers,
@@ -63,7 +63,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
                 return out;
             }
         } else if ("occupancy_rate".equals(metric)) {
-            // Série quotidienne d'occupation (approx) : rdv_count(day) / potential_slots(day)
+
             List<SeriesPointResponse> out = new ArrayList<>();
             for (LocalDate d = from; !d.isAfter(to); d = d.plusDays(1)) {
                 long rdvDay = rdvRepo.countByDate(d);
@@ -76,7 +76,7 @@ public class AdminStatsServiceImpl implements AdminStatsService {
         return List.of();
     }
 
-    // --- Helpers
+
 
     private long countPotentialSlots(LocalDate from, LocalDate to, int stepMinutes) {
         long total = 0;

@@ -7,7 +7,7 @@ import { PrestataireApi, PrestataireMe } from '../../../core/api/prestataire.api
 
 type ServiceLight = { id: string|number; nom: string };
 
-// Enum jour côté front, en phase avec l'enum Java (STRING)
+
 const JOUR_ENUMS = ['LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI','DIMANCHE'] as const;
 type JourEnum = typeof JOUR_ENUMS[number];
 
@@ -26,15 +26,15 @@ export class DisponibilitesPage implements OnInit {
   linkedServices: ServiceLight[] = [];
   dispos: Disponibilite[] = [];
 
-  // création
+
   form: FormGroup = this.fb.group({
     jourSemaine: ['LUNDI', Validators.required],
     heureDebut: ['09:00', Validators.required],
     heureFin: ['17:00', Validators.required],
-    serviceId: [null], // null = aucun
+    serviceId: [null], 
   });
 
-  // édition inline
+
   editingId: string|number|null = null;
   editForm: FormGroup = this.fb.group({
     jourSemaine: ['LUNDI', Validators.required],
@@ -46,7 +46,7 @@ export class DisponibilitesPage implements OnInit {
   ngOnInit() {
     this.proApi.me().subscribe(me => {
       this.me = me;
-      // Services liés du prestataire → pour le select
+
       const raw = (me.services ?? []) as any[];
       this.linkedServices = raw.map(s => ({ id: s.id, nom: s.nom })) as ServiceLight[];
       this.load();
@@ -55,7 +55,7 @@ export class DisponibilitesPage implements OnInit {
 
   load() { this.api.listByPrestataire(this.me.id).subscribe(list => this.dispos = list); }
 
-  // Helpers UX
+
   labelJour(j: JourEnum) {
     const labels: Record<JourEnum,string> = {
       LUNDI:'Lundi', MARDI:'Mardi', MERCREDI:'Mercredi', JEUDI:'Jeudi',
@@ -76,7 +76,7 @@ export class DisponibilitesPage implements OnInit {
     if (!fin || fin <= d) {
       const [H,M] = d.split(':').map(Number);
       const date = new Date(0,0,0,H,M);
-      date.setMinutes(date.getMinutes() + 60); // +1h par défaut
+      date.setMinutes(date.getMinutes() + 60); 
       const hh = String(date.getHours()).padStart(2,'0');
       const mm = String(date.getMinutes()).padStart(2,'0');
       f.patchValue({ heureFin: `${hh}:${mm}` }, { emitEvent:false });
@@ -101,7 +101,7 @@ export class DisponibilitesPage implements OnInit {
   startEdit(d: Disponibilite) {
     this.editingId = d.id;
     this.editForm.setValue({
-      jourSemaine: d.jourSemaine as any,   // ex: "LUNDI"
+      jourSemaine: d.jourSemaine as any,  
       heureDebut: d.heureDebut,
       heureFin: d.heureFin,
       serviceId: d.serviceId ?? null
@@ -135,7 +135,7 @@ export class DisponibilitesPage implements OnInit {
     });
   }
 
-  // Groupement par jour
+
   disposByDay(j: JourEnum) {
     return this.dispos.filter(x => x.jourSemaine === j);
   }

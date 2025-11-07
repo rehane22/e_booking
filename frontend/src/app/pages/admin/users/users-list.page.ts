@@ -1,4 +1,3 @@
-// src/app/pages/admin/users/users-list.page.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +15,8 @@ export class UsersListPage implements OnInit {
   items: AdminUserItem[] = [];
   total = 0; page = 0; size = 20;
   query = '';
-  status: 'ALL'|'ACTIF'|'BLOQUE' = 'ALL'; // ← renommé
+  status: 'ALL'|'ACTIF'|'BLOQUE' = 'ALL'; 
+  role: 'ALL'|'CLIENT'|'PRO' = 'ALL';
   sort = 'createdAt,DESC';
 
   ngOnInit() { this.load(0); }
@@ -25,7 +25,9 @@ export class UsersListPage implements OnInit {
     this.page = p;
     this.api.list({
       query: this.query,
-      status: this.status,   // ← utiliser `status`
+      status: this.status,  
+      role: this.role,
+      excludeRole: 'ADMIN',
       page: this.page,
       size: this.size,
       sort: this.sort
@@ -33,6 +35,15 @@ export class UsersListPage implements OnInit {
       this.items = res.items;
       this.total = res.total;
     });
+  }
+
+  applyFilters() { this.load(0); }
+
+  resetFilters() {
+    this.query = '';
+    this.status = 'ALL';
+    this.role = 'ALL';
+    this.load(0);
   }
 
   activate(u: AdminUserItem) {
@@ -69,4 +80,5 @@ export class UsersListPage implements OnInit {
       'bg-rose-100 text-rose-700': statut === 'BLOQUE',
     };
   }
+
 }

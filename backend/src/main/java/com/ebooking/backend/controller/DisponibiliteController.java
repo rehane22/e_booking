@@ -17,18 +17,18 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/disponibilites") // <-- aligné avec le front
+@RequestMapping("/disponibilites")
 public class DisponibiliteController {
 
     private final DisponibiliteService dispoService;
 
-    // Public : lister toutes les dispos d'un prestataire (tous jours)
+
     @GetMapping("/{prestataireId}")
     public ResponseEntity<List<DisponibiliteResponse>> list(@PathVariable Long prestataireId) {
         return ResponseEntity.ok(dispoService.listByPrestataire(prestataireId));
     }
 
-    // PRO owner : create
+
     @PreAuthorize("hasRole('PRO')")
     @PostMapping
     public ResponseEntity<DisponibiliteResponse> create(@Valid @RequestBody DisponibiliteRequest req) {
@@ -36,7 +36,7 @@ public class DisponibiliteController {
         return ResponseEntity.ok(dispoService.create(uid, req));
     }
 
-    // PRO owner : update
+
     @PreAuthorize("hasRole('PRO')")
     @PutMapping("/{id}")
     public ResponseEntity<DisponibiliteResponse> update(@PathVariable Long id,
@@ -45,7 +45,7 @@ public class DisponibiliteController {
         return ResponseEntity.ok(dispoService.update(uid, id, req));
     }
 
-    // PRO owner : delete
+
     @PreAuthorize("hasRole('PRO')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
@@ -54,13 +54,13 @@ public class DisponibiliteController {
         return ResponseEntity.noContent().build();
     }
 
-    // Public : slots
+
     @GetMapping("/{prestataireId}/slots")
     public ResponseEntity<List<String>> slots(
             @PathVariable Long prestataireId,
-            @RequestParam String date,               // YYYY-MM-DD (requis)
-            @RequestParam(required = false) Long serviceId, // optionnel
-            @RequestParam(required = false) Integer step,   // minutes (par défaut 30)
+            @RequestParam String date,              
+            @RequestParam(required = false) Long serviceId, 
+            @RequestParam(required = false) Integer step, 
             @RequestParam(required = false) Integer dureeMin
     ) {
         if (date == null || date.isBlank()) {

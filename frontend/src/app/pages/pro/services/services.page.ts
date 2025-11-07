@@ -29,7 +29,7 @@ export class ServicesPage implements OnInit {
       this.catalogApi.findAll().subscribe(all => {
         this.catalogue = all;
 
-        // Filtrer ce qui n'est pas déjà lié
+        
         const linkedIds = new Set(linked.map(s => s.id));
         this.catalogueNonLies = all.filter(s => !linkedIds.has(s.id));
       });

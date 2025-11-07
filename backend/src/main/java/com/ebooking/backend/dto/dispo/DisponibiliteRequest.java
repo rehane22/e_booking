@@ -6,7 +6,7 @@ import jakarta.validation.constraints.*;
 public record DisponibiliteRequest(
         @NotNull Long prestataireId,
         @NotNull JourSemaine jourSemaine,
-        @NotNull String heureDebut,  // "HH:mm"
-        @NotNull String heureFin,    // "HH:mm"
-        Long serviceId               // null = créneau général
+        @NotNull String heureDebut,  
+        @NotNull String heureFin,   
+        Long serviceId              
 ) {}

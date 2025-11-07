@@ -19,15 +19,15 @@ import java.time.LocalTime;
 public class RendezVous {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Service réservé
+    private Long id; 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "service_id", nullable = false, foreignKey = @ForeignKey(name = "fk_rdv_service"))
     private ServiceCatalog service;
-    //Prestataire choisi
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "prestataire_id", nullable = false, foreignKey = @ForeignKey(name = "fk_rdv_prestataire"))
     private Prestataire prestataire;
-    // Client (User)
+
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false, foreignKey = @ForeignKey(name = "fk_rdv_client"))
     private User client;

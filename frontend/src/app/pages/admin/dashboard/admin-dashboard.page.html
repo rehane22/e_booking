@@ -1,5 +1,4 @@
 <div class="max-w-7xl mx-auto space-y-6">
-    <!-- Header + période -->
     <div class="flex items-center justify-between mt-4">
       <h1 class="text-2xl font-semibold">Dashboard Admin</h1>
       <div class="flex items-center gap-3">
@@ -15,9 +14,9 @@
       </div>
     </div>
 
-    <!-- Stats tuiles -->
+
     <div class="grid md:grid-cols-3 gap-6">
-      <!-- Utilisateurs -->
+
       <div class="card p-6">
         <div class="flex items-center justify-between">
           <h3 class="font-semibold">Utilisateurs</h3>
@@ -30,14 +29,14 @@
         </div>
       </div>
 
-      <!-- RDV -->
+
       <div class="card p-6">
         <h3 class="font-semibold">Rendez-vous</h3>
         <p class="text-3xl mt-2">{{ summary()?.totalRdv ?? '—' }}</p>
         <p class="text-sm text-muted mt-1">Aujourd’hui: {{ summary()?.todayRdv ?? '—' }}</p>
       </div>
 
-      <!-- Occupation -->
+
       <div class="card p-6">
         <div class="flex items-center justify-between">
           <h3 class="font-semibold">Taux d’occupation</h3>
@@ -52,7 +51,7 @@
           <span class="text-sm text-muted">Réservé / capacité</span>
         </div>
 
-        <!-- Barre de progression -->
+
         <div class="mt-3 w-full h-3 rounded-full bg-black/10 overflow-hidden" aria-label="Taux d’occupation">
           <div class="h-3" [ngClass]="occBarClass(summary()?.occupancyRate || 0)"
                [style.width.%]="clamp(summary()?.occupancyRate || 0)"></div>
@@ -60,7 +59,7 @@
       </div>
     </div>
 
-    <!-- Évolution RDV (graph clair) -->
+
     <div class="card p-6">
       <div class="flex items-center justify-between">
         <div>
@@ -82,8 +81,6 @@
         <span>Total période : {{ summary()?.totalRdv ?? '—' }}</span>
       </div>
     </div>
-
-    <!-- Gestion des services -->
     <div class="card p-6">
       <div class="flex items-center justify-between">
         <h3 class="font-semibold">Gestion des services</h3>

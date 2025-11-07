@@ -6,7 +6,7 @@ import { DisponibiliteApi, Disponibilite } from '../../../core/api/disponibilite
 import { PrestataireApi } from '../../../core/api/prestataire.api';
 import { RendezVousApi } from '../../../core/api/rendezvous.api';
 
-type DayWindow = { start: string; end: string }; // "HH:mm"
+type DayWindow = { start: string; end: string };
 
 @Component({
   standalone: true,
@@ -22,32 +22,31 @@ export class PrestataireDetailPage implements OnInit {
 
   id = '';
 
-  // Profil public
+
   name = '';
   adresse = '';
   specialite = '';
   services: { id: number|string; nom: string }[] = [];
   serviceId: number|string|null = null;
 
-  // Disponibilités (hebdo) pour construire la grille du jour
+
   allDispos: Disponibilite[] = [];
 
-  // Sélection & grille
+
   date = new Date().toISOString().slice(0,10);
   todayISO = new Date().toISOString().slice(0,10);
-  dureeMin = 60; // par défaut pour bien reproduire ton cas
+  dureeMin = 60; 
   heureDebut: string | null = null;
 
-  // Slots retournés par l’API (début potentiels réellement libres)
+
   apiSlots: string[] = [];
   apiSlotsSet = new Set<string>();
 
-  // Grille affichée (toute la plage d’ouverture du jour, pas = stepMin)
   grid: string[] = [];
   stepMin = 30;
   private readonly gridBaseStep = 30;
 
-  // UI state
+
   loading = false;
   errorText = '';
   successText = '';
@@ -55,7 +54,7 @@ export class PrestataireDetailPage implements OnInit {
   ngOnInit() {
     this.id = this.route.snapshot.paramMap.get('id') ?? '';
 
-    // Profil public
+
     this.proApi.getPublic(this.id).subscribe(p => {
       this.name = `${p.prenom ?? ''} ${p.nom ?? ''}`.trim() || `Prestataire #${this.id}`;
       this.adresse = (typeof p.adresse === 'string') ? p.adresse : (p.adresse?.rue || p.adresse?.ville || '');
@@ -65,13 +64,13 @@ export class PrestataireDetailPage implements OnInit {
       this.onFiltersChange();
     });
 
-    // Récupère les dispos hebdo une seule fois (pour construire la grille du jour)
+
     this.dispoApi.listByPrestataire(this.id).subscribe({
       next: (list) => { this.allDispos = list ?? []; this.onFiltersChange(); },
       error: () => { /* on fait sans si erreur */ this.onFiltersChange(); }
     });
 
-    // Scroll éventuel
+
     const focus = this.route.snapshot.queryParamMap.get('focus');
     if (focus === 'slots') {
       queueMicrotask(() => document.getElementById('slots')?.scrollIntoView({ behavior: 'smooth' }));
@@ -83,7 +82,7 @@ export class PrestataireDetailPage implements OnInit {
     this.errorText = '';
     this.successText = '';
     this.heureDebut = null;
-    this.loadSlots(); // charge apiSlots puis reconstruit la grille/mask
+    this.loadSlots(); 
   }
 
   /* ---------- Chargement des slots (API) ---------- */
@@ -96,7 +95,7 @@ export class PrestataireDetailPage implements OnInit {
         this.apiSlots = arr ?? [];
         this.apiSlotsSet = new Set(this.apiSlots);
 
-        // infère le pas (15/30) d'après les 2 premiers slots sinon 30
+
         this.stepMin = this.inferStep(this.apiSlots) ?? this.gridBaseStep;
 
         this.updateGridMask();
@@ -111,11 +110,11 @@ export class PrestataireDetailPage implements OnInit {
 
   /* ---------- Grille & disponibilité ---------- */
 
-  // Crée la grille complète du jour en utilisant les fenêtres d’ouverture correspondant au jour de semaine & service
+
   buildDayGrid(): string[] {
     const windows = this.dayWindowsForSelectedDate();
     if (!windows.length) {
-      // fallback : bornes min/max basées sur les slots API s’ils existent
+    
       if (this.apiSlots.length) {
         const first = this.apiSlots[0];
         const last = this.apiSlots[this.apiSlots.length - 1];
@@ -124,20 +123,19 @@ export class PrestataireDetailPage implements OnInit {
       return [];
     }
 
-    // fusionne les fenêtres (au cas où il y en ait plusieurs)
     const grid: string[] = [];
     const step = this.gridStep();
     windows.forEach(w => {
       grid.push(...this.enumerateTimes(w.start, w.end, step));
     });
-    // déduplique en conservant l’ordre
+
     return Array.from(new Set(grid));
   }
 
-  // Retourne les fenêtres d’ouverture (start/end) pour le jour sélectionné, filtrées par service si défini
+
   dayWindowsForSelectedDate(): DayWindow[] {
     if (!this.allDispos?.length) return [];
-    const dayIdx = new Date(this.date).getDay(); // 0=Sun ... 6=Sat
+    const dayIdx = new Date(this.date).getDay(); 
     const mapJour = ['DIMANCHE','LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI'] as const;
     const jourStr = mapJour[dayIdx];
 
@@ -148,15 +146,12 @@ export class PrestataireDetailPage implements OnInit {
     return filtered.map(d => ({ start: d.heureDebut, end: d.heureFin }));
   }
 
-  // Met à jour la logique de masquage selon la durée (pas de state à garder — tout est calculé dans isStartReservable)
+ 
   recomputeGridMask() {
     this.loadSlots();
   }
 
-  // Un début est réservable si:
-  //  - il n’est pas dans le passé
-  //  - il est explicitement renvoyé par l’API (Set apiSlots)
-  //  - et la fin reste dans une fenêtre d’ouverture
+
   isStartReservable(hhmm: string): boolean {
     if (this.isPastSlot(hhmm)) return false;
     if (!this.apiSlotsSet.has(hhmm)) return false;
@@ -166,8 +161,8 @@ export class PrestataireDetailPage implements OnInit {
     return true;
   }
 
-  // Le temps est-il dans une des fenêtres d’ouverture du jour ?
-  // if allowEnd==true, on autorise end == window.end
+
+
   isInsideWindows(hhmm: string, allowEnd = false): boolean {
     const windows = this.dayWindowsForSelectedDate();
     const t = this.toMinutes(hhmm);
@@ -201,7 +196,7 @@ export class PrestataireDetailPage implements OnInit {
   inferStep(slots: string[]): number | null {
     if (slots.length >= 2) {
       const d = this.toMinutes(slots[1]) - this.toMinutes(slots[0]);
-      if (d > 0 && d % 5 === 0) return d; // 15/30/60…
+      if (d > 0 && d % 5 === 0) return d; 
     }
     return null;
   }
@@ -245,7 +240,7 @@ export class PrestataireDetailPage implements OnInit {
     if (selectedDate < today) return true;
     if (this.date > this.todayISO) return false;
 
-    // même jour
+
     const [h, m] = hhmm.split(':').map(Number);
     const slot = new Date(now);
     slot.setHours(h, m, 0, 0);

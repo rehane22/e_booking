@@ -105,7 +105,7 @@ class DisponibiliteServiceImplTest {
 
         List<String> slots = service.slotsForDate(7L, null, "2025-11-08", 30, 60);
         assertThat(slots).contains("09:00", "10:30");
-        assertThat(slots).doesNotContain("11:30"); // 11:30 + 60 > 12:00
+        assertThat(slots).doesNotContain("11:30"); 
     }
 
     @Test

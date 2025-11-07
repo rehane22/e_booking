@@ -25,18 +25,18 @@ export class CatalogueServicesPage implements OnInit {
 
   @ViewChild('rightScroll') rightScrollRef!: ElementRef<HTMLDivElement>;
 
-  // Services (gauche)
+
   services: ServiceItem[] = [];
   servicesView: ServiceItem[] = [];
   selected = new Set<string|number>();
   svcQuery = '';
 
-  // Prestataires (droite)
+
   prosAll: ProCard[] = [];
   proQuery = '';
   sortKey: 'nomAffiche' | 'ville' = 'nomAffiche';
 
-  // Pagination interne (droite)
+
   pageSize = 10;
   page = 1;
 
@@ -45,7 +45,7 @@ export class CatalogueServicesPage implements OnInit {
       this.services = list;
       this.servicesView = [...list];
     });
-    // ✅ Charger tous les prestataires au démarrage
+
     this.fetchAllPros();
   }
 
@@ -60,7 +60,6 @@ export class CatalogueServicesPage implements OnInit {
   toggle(id: string|number, el?: any) {
     const willCheck = el ? el.checked : !this.selected.has(id);
     if (willCheck) this.selected.add(id); else this.selected.delete(id);
-    // ✅ Filtrage immédiat au clic
     this.fetchPros();
   }
 

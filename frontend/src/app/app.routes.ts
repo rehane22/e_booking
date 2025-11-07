@@ -5,7 +5,7 @@ import { proProfileGuard } from './core/guards/pro-profile.guard';
 
 
 export const routes: Routes = [
-    // Public
+
     { path: '', loadComponent: () => import('./pages/public/home/home.page').then(m => m.HomePage) },
     { path: 'auth/login', loadComponent: () => import('./pages/auth/login/login.page').then(m => m.LoginPage) },
     { path: 'auth/register', loadComponent: () => import('./pages/auth/register/register.page').then(m => m.RegisterPage) },
@@ -13,11 +13,9 @@ export const routes: Routes = [
      { path: 'prestataires/:id', loadComponent: () => import('./pages/client/prestataire-detail/prestataire-detail.page')
       .then(m => m.PrestataireDetailPage) },
 
-    // Client (auth)
     { path: 'services', loadComponent: () => import('./pages/client/catalogue-services/catalogue-services.page').then(m => m.CatalogueServicesPage) },
     { path: 'mon-compte', canMatch: [authGuard], loadComponent: () => import('./pages/client/mon-compte/mon-compte.page').then(m => m.MonComptePage) },
   
-    // Pro
     {
         path: 'pro/onboarding', canMatch: [authGuard, roleGuard(['PRO'])],
         loadComponent: () => import('./pages/pro/onboarding/onboarding.page').then(m => m.OnboardingPage)

@@ -7,7 +7,7 @@ import com.ebooking.backend.dto.dispo.DisponibiliteUpdateRequest;
 import java.util.List;
 
 public interface DisponibiliteService {
-    List<DisponibiliteResponse> listByPrestataire(Long prestataireId); // <-- renvoie TOUTES les dispos du prestataire
+    List<DisponibiliteResponse> listByPrestataire(Long prestataireId); 
     DisponibiliteResponse create(Long currentUserId, DisponibiliteRequest req);
     DisponibiliteResponse update(Long currentUserId, Long dispoId, DisponibiliteUpdateRequest req);;
     void delete(Long currentUserId, Long dispoId);

@@ -1,4 +1,3 @@
-// src/app/pages/admin/dashboard/admin-dashboard.page.ts
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +7,7 @@ import { ServiceCatalogApi, ServiceItem } from '../../../core/api/service-catalo
 
 type Delta = { value: number; sign: 'up'|'down'|'flat'; pct?: number };
 
-// 🔧 Ajoute ça tout en haut du fichier (hors classe)
+
 function isoOffsetDays(delta: number): string {
   const dt = new Date();
   dt.setDate(dt.getDate() + delta);
@@ -24,27 +23,27 @@ export class AdminDashboardPage implements OnInit {
   private statsApi = inject(AdminStatsApi);
   private svcApi = inject(ServiceCatalogApi);
 
-  // Période courante
+
   preset: '7'|'30'|'90'|'custom' = '30';
  from = isoOffsetDays(-30);
 to   = isoOffsetDays(0);
 
-  // Période précédente (pour Δ)
+
   prevFrom = '';
   prevTo = '';
 
-  // Stats + séries
+
   readonly summary = signal<StatsSummary | undefined>(undefined);
   readonly prevSummary = signal<StatsSummary | undefined>(undefined);
   readonly series = signal<SeriesPoint[]>([]);
   readonly occSeries = signal<SeriesPoint[]>([]);
 
-  // Services
+
   readonly services = signal<ServiceItem[]>([]);
   readonly servicesView = signal<ServiceItem[]>([]);
   svcQuery = '';
 
-  // Édition
+
   readonly editRow = signal<Partial<ServiceItem> | null>(null);
   saveError = '';
   touchNom = false;
@@ -66,12 +65,12 @@ to   = isoOffsetDays(0);
   }
 
   load() {
-    // période courante
+
     this.statsApi.summary(this.from, this.to).subscribe(s => this.summary.set(s));
     this.statsApi.series('rdv_count', this.from, this.to, 'daily').subscribe(s => this.series.set(s));
     this.statsApi.series('occupancy_rate', this.from, this.to, 'daily').subscribe(s => this.occSeries.set(s));
 
-    // période précédente (pour Δ)
+
     this.statsApi.summary(this.prevFrom, this.prevTo).subscribe(s => this.prevSummary.set(s));
   }
 
@@ -85,13 +84,13 @@ to   = isoOffsetDays(0);
     const cur = this.summary()?.totalRdv ?? 0;
     const prev = this.prevSummary()?.totalRdv ?? 0;
     return this.makeDelta(cur, prev, true);
-    // value: différence absolue de RDV, pct: % vs précédent
+
   }
 
   occDelta(): Delta {
     const cur = this.summary()?.occupancyRate ?? 0;
     const prev = this.prevSummary()?.occupancyRate ?? 0;
-    return this.makeDelta(cur, prev, false); // points de % (pas diviser par 100)
+    return this.makeDelta(cur, prev, false); 
   }
 
   barHeightGeneric(v: number, arr: { value: number }[]) {
@@ -110,7 +109,7 @@ to   = isoOffsetDays(0);
 
   private computePrevRange() {
     const days = this.daysBetween(this.from, this.to);
-    // Période précédente = même durée qui précède immédiatement "from"
+    
     const start = this.shiftDate(this.from, -days);
     const end = this.shiftDate(this.from, -1);
     this.prevFrom = start;
@@ -120,7 +119,7 @@ to   = isoOffsetDays(0);
   private daysBetween(from: string, to: string) {
     const a = new Date(from + 'T00:00:00Z').getTime();
     const b = new Date(to + 'T00:00:00Z').getTime();
-    const diff = Math.max(0, (b - a) / (1000*60*60*24)) + 1; // inclusif
+    const diff = Math.max(0, (b - a) / (1000*60*60*24)) + 1; 
     return Math.max(1, Math.floor(diff));
   }
 
@@ -174,7 +173,7 @@ to   = isoOffsetDays(0);
     const r = this.editRow();
     if (!r) return false;
     if (!this.validNom()) return false;
-    if (r.id && !this.canUpdate()) return false; // update => ADMIN only
+    if (r.id && !this.canUpdate()) return false; 
     return true;
   }
   cancelEdit() { this.editRow.set(null); this.saveError=''; }

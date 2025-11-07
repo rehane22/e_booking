@@ -9,7 +9,7 @@ import org.mapstruct.MappingTarget;
 public interface ServiceMapper {
     ServiceResponse toResponse(ServiceCatalog entity);
 
-    // update « in place » (utile pour PUT)
+ 
     void updateEntityFromRequest(com.ebooking.backend.dto.service.ServiceRequest req,
                                  @MappingTarget ServiceCatalog entity);
 }

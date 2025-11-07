@@ -1,9 +1,9 @@
-// src/app/core/api/admin-user.api.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export type UserStatus = 'ACTIF' | 'BLOQUE' ;
+export type UserRoleFilter = 'CLIENT' | 'PRO' | 'ADMIN' | 'ALL';
 export interface AdminUserItem {
   id: number;
   prenom: string;
@@ -31,13 +31,14 @@ export interface Page<T> {
 @Injectable({ providedIn: 'root' })
 export class AdminUserApi {
   private http = inject(HttpClient);
-  // garde /api si ton proxy le réécrit vers le back ; sinon mets simplement '/admin/users'
+
   private base = '/api/admin/users';
 
   list(opts: {
     query?: string;
-    // ⚠️ le back attend `status`, pas `statut`
     status?: UserStatus | 'ALL';
+    role?: UserRoleFilter;
+    excludeRole?: UserRoleFilter | 'NONE';
     page?: number;
     size?: number;
     sort?: string;
@@ -48,6 +49,8 @@ export class AdminUserApi {
 
     if (opts?.query)  params = params.set('query', opts.query);
     if (opts?.status && opts.status !== 'ALL') params = params.set('status', opts.status);
+    if (opts?.role && opts.role !== 'ALL') params = params.set('role', opts.role);
+    if (opts?.excludeRole && opts.excludeRole !== 'ALL') params = params.set('excludeRole', opts.excludeRole);
     if (opts?.sort)   params = params.set('sort', opts.sort);
 
     return this.http.get<Page<AdminUserItem>>(this.base, { params });
@@ -57,7 +60,7 @@ export class AdminUserApi {
     return this.http.get<AdminUserDetail>(`${this.base}/${id}`);
   }
 
-  // ✅ passer en POST pour matcher le backend
+
   activate(id: number | string) {
     return this.http.post<void>(`${this.base}/${id}/activate`, {});
   }

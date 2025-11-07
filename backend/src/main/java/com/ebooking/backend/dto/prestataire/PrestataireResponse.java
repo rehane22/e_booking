@@ -7,7 +7,7 @@ import java.util.List;
 public record PrestataireResponse(
         Long id,
         Long userId,
-        String prenom,   // <-- AJOUT
+        String prenom,  
         String nom,
         String specialite,
         String adresse,

@@ -19,10 +19,11 @@ public class AdminUserController {
     @GetMapping
     public ResponseEntity<?> list(@RequestParam(required = false) String query,
                                   @RequestParam(defaultValue = "ALL") String status,
+                                  @RequestParam(defaultValue = "ALL") String role,
                                   @RequestParam(defaultValue = "0") int page,
                                   @RequestParam(defaultValue = "20") int size,
                                   @RequestParam(defaultValue = "createdAt,DESC") String sort) {
-        Page<AdminUserItemResponse> p = service.list(query, status, page, size, sort);
+        Page<AdminUserItemResponse> p = service.list(query, status, role, "ADMIN", page, size, sort);
         return ResponseEntity.ok(
                 java.util.Map.of("items", p.getContent(), "total", p.getTotalElements())
         );

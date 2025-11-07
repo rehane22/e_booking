@@ -34,7 +34,7 @@ public class User {
     private String nom;
 
     @Column(length = 100, nullable = false)
-    private String email; // Unicité gérée par unique constraint (attention: sensibilité à la casse côté DB)
+    private String email; 
 
     @Column(length = 20, nullable = false)
     private String telephone;

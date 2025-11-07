@@ -5,29 +5,29 @@ export type RdvStatut = 'EN_ATTENTE'|'CONFIRME'|'ANNULE'|'REFUSE';
 
 export type Rdv = {
   id: string|number;
-  date: string;           // "YYYY-MM-DD"
-  heure: string;          // "HH:mm"
+  date: string;      
+  heure: string;        
   clientNom: string;
   serviceNom: string;
   prestataireId: number|string;
   clientId: number|string;
   serviceId: number|string;
   statut: RdvStatut;
-  serviceDureeMin?: number; // pour calcul heure fin
+  serviceDureeMin?: number; 
 };
 
 export type CreateRdvPayload = {
   serviceId: number|string;
   prestataireId: number|string;
-  date: string;   // YYYY-MM-DD
-  heure: string;  // HH:mm
+  date: string; 
+  heure: string; 
   dureeMin?: number;
 };
 
 export type UpdateRdvPayload = Partial<{
   serviceId: number|string;
-  date: string;   // YYYY-MM-DD
-  heure: string;  // HH:mm
+  date: string;  
+  heure: string;  
 }>;
 
 @Injectable({ providedIn: 'root' })

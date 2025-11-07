@@ -35,7 +35,6 @@ public class PrestataireServiceBizImpl implements PrestataireServiceBiz {
         }
         Prestataire p = Prestataire.builder().user(user).specialite(req.specialite()).adresse(req.adresse()).build();
         p = prestataireRepo.save(p);
-        // Lier les services fournis (si liste non vide)
         if (req.serviceIds() != null && !req.serviceIds().isEmpty()) {
             for (Long sid : req.serviceIds()) {
                 ServiceCatalog sc = serviceRepo.findById(sid).orElseThrow(() -> new EntityNotFoundException("Service introuvable: id=" + sid));

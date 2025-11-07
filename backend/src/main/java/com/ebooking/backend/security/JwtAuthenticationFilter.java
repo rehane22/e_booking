@@ -49,10 +49,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
                 ((AbstractAuthenticationToken) auth).setAuthenticated(true);
 
-                // Place dans le SecurityContext
+                
                 org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (Exception ex) {
-                // token invalide/expiré → pas d’auth ; on laisse tomber sur 401 plus tard si endpoint protégé
+                
             }
         }
 

@@ -60,12 +60,12 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
             if (!linked) throw new UnprocessableEntityException("Ce prestataire n'offre pas ce service");
         }
 
-        // Anti-chevauchement
+
         checkOverlapsOnCreate(p.getId(), req.jourSemaine(), debut, fin, sc);
 
         Disponibilite d = Disponibilite.builder()
                 .prestataire(p)
-                .service(sc) // null = général
+                .service(sc) 
                 .jourSemaine(req.jourSemaine())
                 .heureDebut(debut)
                 .heureFin(fin)
@@ -94,8 +94,6 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
             boolean linked = prestataireServiceRepo.existsByPrestataireIdAndServiceId(p.getId(), sc.getId());
             if (!linked) throw new UnprocessableEntityException("Ce prestataire n'offre pas ce service");
         }
-
-        // Anti-chevauchement (ignorer soi-même)
         checkOverlapsOnUpdate(p.getId(), req.jourSemaine(), debut, fin, sc, d.getId());
 
         d.setJourSemaine(req.jourSemaine());
@@ -131,7 +129,7 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
     }
 
     private LocalTime parse(String hhmm) {
-        return LocalTime.parse(hhmm); // "HH:mm"
+        return LocalTime.parse(hhmm);
     }
 
     private void checkOverlapsOnCreate(Long prestataireId, JourSemaine jour, LocalTime debut, LocalTime fin, ServiceCatalog sc) {
@@ -201,7 +199,7 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
                  t.plusMinutes(stepMinutes).compareTo(d.getHeureFin()) <= 0;
                  t = t.plusMinutes(stepMinutes)) {
                 LocalTime candidateEnd = t.plusMinutes(requiredDuration);
-                if (candidateEnd.isBefore(t)) continue; // évite de déborder sur le lendemain
+                if (candidateEnd.isBefore(t)) continue; 
                 if (!candidateEnd.isAfter(d.getHeureFin())) {
                     all.add(t);
                 }
@@ -215,7 +213,7 @@ public class DisponibiliteServiceImpl implements DisponibiliteService {
             LocalTime rdvStart = r.getHeure();
             LocalTime rdvEnd = rdvStart.plusMinutes(durationForRendezVous(r, stepMinutes));
             if (rdvEnd.isBefore(rdvStart)) {
-                rdvEnd = LocalTime.MAX; // si la durée déborde, bloquer le reste de la journée
+                rdvEnd = LocalTime.MAX; 
             }
             LocalTime finalRdvEnd = rdvEnd;
             all.removeIf(slot -> (slot.equals(rdvStart) || slot.isAfter(rdvStart)) && slot.isBefore(finalRdvEnd));

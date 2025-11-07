@@ -48,8 +48,6 @@ public class UserServiceImpl implements UserService {
         u.setPrenom(req.prenom().trim());
         u.setNom(req.nom().trim());
         u.setTelephone(req.telephone() == null ? null : req.telephone().trim());
-
-        // email / roles / statut -> non modifiables ici
         u = userRepo.save(u);
 
         var roles = userRoleRepo.findByUserId(u.getId()).stream().map(r -> r.getRole().name()).toList();

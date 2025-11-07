@@ -3,6 +3,33 @@
       <h1 class="text-2xl font-semibold">Utilisateurs</h1>
     </div>
     
+    <form class="card p-6 flex flex-wrap gap-4 items-end" (ngSubmit)="applyFilters()">
+      <div class="flex-1 min-w-[200px]">
+        <label class="text-xs text-muted">Recherche</label>
+        <input class="input w-full" type="text" [(ngModel)]="query" name="queryFilter" placeholder="Nom, prénom ou email">
+      </div>
+      <div>
+        <label class="text-xs text-muted">Statut</label>
+        <select class="input" [(ngModel)]="status" name="statusFilter">
+          <option value="ALL">Tous</option>
+          <option value="ACTIF">Actif</option>
+          <option value="BLOQUE">Bloqué</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-muted">Rôle</label>
+        <select class="input" [(ngModel)]="role" name="roleFilter">
+          <option value="ALL">Tous</option>
+          <option value="CLIENT">Client</option>
+          <option value="PRO">Professionnel</option>
+        </select>
+      </div>
+
+      <div class="flex gap-2">
+        <button class="btn-primary h-10" type="submit">Filtrer</button>
+        <button class="btn-ghost h-10" type="button" (click)="resetFilters()">Réinitialiser</button>
+      </div>
+    </form>
     <div class="text-sm text-muted">Total: {{ total }}</div>
     <div class="card p-0 overflow-hidden">
       <table class="w-full text-sm">

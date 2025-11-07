@@ -14,18 +14,18 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/services") // ATTENTION: pas de /api ici
+@RequestMapping("/services")
 public class ServiceController {
 
     private final ServiceCatalogService serviceCatalogService;
 
-    // Public
+
     @GetMapping
     public ResponseEntity<List<ServiceResponse>> findAll() {
         return ResponseEntity.ok(serviceCatalogService.findAll());
     }
 
-    // ADMIN
+
     @PreAuthorize("hasAnyRole('ADMIN','PRO')")
     @PostMapping
     public ResponseEntity<ServiceResponse> create(@Valid @RequestBody ServiceRequest req) {
@@ -33,7 +33,7 @@ public class ServiceController {
         return ResponseEntity.created(URI.create("/services/" + created.id())).body(created);
     }
 
-    // ADMIN
+
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ServiceResponse> update(@PathVariable Long id,
@@ -41,7 +41,7 @@ public class ServiceController {
         return ResponseEntity.ok(serviceCatalogService.update(id, req));
     }
 
-    // ADMIN
+
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

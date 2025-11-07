@@ -12,7 +12,6 @@
     </div>
 
     @if (user) {
-      <!-- FICHE + ÉDITION -->
       <div class="card p-6 space-y-4">
         <div class="grid sm:grid-cols-2 gap-4">
           <p><b>ID:</b> {{ user.id }}</p>
@@ -52,7 +51,7 @@
         </form>
       </div>
 
-      <!-- RENDEZ-VOUS — UX alignée "Mon compte" -->
+
       <div class="card p-6 space-y-6">
         <div class="flex items-center justify-between">
           <h3 class="font-semibold">Rendez-vous</h3>
@@ -61,7 +60,7 @@
           </div>
         </div>
 
-        <!-- Filtres -->
+
         <form [formGroup]="filters" (ngSubmit)="apply()" class="flex flex-wrap items-end gap-3">
           <div>
             <label class="text-xs">Date</label>
@@ -81,7 +80,7 @@
           <button class="btn-ghost h-10" type="button" (click)="clear()" [disabled]="loadingRdv">Réinitialiser</button>
         </form>
 
-        <!-- À venir -->
+
         <div class="p-6 rounded-2xl border border-black/10">
           <div class="flex items-center justify-between">
             <h4 class="font-semibold">À venir</h4>
@@ -107,14 +106,6 @@
                   </div>
                   <div class="flex gap-2 shrink-0">
                     <a class="btn-ghost h-9" [routerLink]="['/prestataires', r.prestataireId]">Voir prestataire</a>
-                    <!-- Optionnel : action admin si tu as l’endpoint d’annulation côté back -->
-                    <!--
-                    @if (r.statut !== 'ANNULE' && r.statut !== 'REFUSE') {
-                      <button class="btn-ghost h-9 text-red-600" (click)="cancel(r)" [disabled]="cancelingId===r.id">
-                        @if (cancelingId===r.id) { Annulation… } @else { Annuler }
-                      </button>
-                    }
-                    -->
                   </div>
                 </div>
               </div>
@@ -124,7 +115,7 @@
           </div>
         </div>
 
-        <!-- Passés (repliables) -->
+
         <div class="p-6 rounded-2xl border border-black/10">
           <div class="flex items-center justify-between">
             <h4 class="font-semibold">Passés</h4>

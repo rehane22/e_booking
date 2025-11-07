@@ -15,14 +15,13 @@ export class HomePage implements OnInit {
     const token = localStorage.getItem('accessToken');
     if (!token) return;
 
-    // rôles depuis le localStorage (comme dans ton App)
     let roles: string[] = [];
     try { roles = JSON.parse(localStorage.getItem('roles') || '[]'); } catch {}
 
     if (roles.includes('ADMIN')) {
       this.router.navigate(['/admin/dashboard']);
     } else {
-      this.router.navigate(['/services']); // catalogue
+      this.router.navigate(['/services']); 
     }
   }
 }

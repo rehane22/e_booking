@@ -4,7 +4,6 @@
       <a class="btn-ghost h-10" routerLink="/services">← Catalogue</a>
     </div>
 
-    <!-- ======= INFOS PERSONNELLES ======= -->
     <section class="card p-6 mt-6">
       <h2 class="text-lg font-semibold">Informations personnelles</h2>
       <p class="text-sm text-muted mb-4">Modifie tes informations (l’email n’est pas modifiable).</p>
@@ -43,7 +42,6 @@
       </form>
     </section>
 
-    <!-- ======= MES RENDEZ-VOUS (style aligné sur la page pro) ======= -->
     @if (!has('ADMIN')) {
       <section class="card p-6 mt-6 space-y-6">
         <div class="flex items-center justify-between">
@@ -53,7 +51,7 @@
           </div>
         </div>
 
-        <!-- Filtres -->
+
         <form [formGroup]="filters" (ngSubmit)="apply()" class="flex flex-wrap gap-3 items-end">
           <div>
             <label class="text-xs">Date</label>
@@ -73,7 +71,7 @@
           <button class="btn-ghost h-10" type="button" (click)="clear()">Réinitialiser</button>
         </form>
 
-        <!-- À venir -->
+
         <div class="p-6 rounded-2xl border border-black/10">
           <h3 class="font-semibold mb-3">À venir</h3>
           <div class="space-y-3">
@@ -114,7 +112,6 @@
           </div>
         </div>
 
-        <!-- Passés (repliables) -->
         <div class="p-6 rounded-2xl border border-black/10">
           <div class="flex items-center justify-between">
             <h3 class="font-semibold">Passés</h3>

@@ -38,7 +38,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/register", "/users/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/services").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/prestataires/*").permitAll()            // <-- détail prestataire
+                        .requestMatchers(HttpMethod.GET, "/prestataires/*").permitAll()            
                         .requestMatchers(HttpMethod.GET, "/disponibilites/*/slots").permitAll()
                         .requestMatchers(HttpMethod.GET, "/disponibilites/*").permitAll()
                         .requestMatchers("/actuator/health").permitAll()

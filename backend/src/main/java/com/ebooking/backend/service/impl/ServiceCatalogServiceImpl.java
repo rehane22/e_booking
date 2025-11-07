@@ -51,7 +51,6 @@ public class ServiceCatalogServiceImpl implements ServiceCatalogService {
         if (repo.existsByNomIgnoreCaseAndIdNot(nom, id)) {
             throw new EntityExistsException("Nom de service déjà utilisé");
         }
-        // maj champs
         entity.setNom(nom);
         entity.setDescription(req.description());
         return mapper.toResponse(entity);

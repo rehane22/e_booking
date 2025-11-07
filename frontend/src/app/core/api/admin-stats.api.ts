@@ -1,4 +1,3 @@
-// src/app/core/api/admin-stats.api.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -10,8 +9,8 @@ export interface StatsSummary {
   blockedUsers: number;
   totalRdv: number;
   todayRdv: number;
-  occupancyRate: number; // 0..100
-  avgLeadTimeDays?: number; // délai moyen entre réservation et RDV
+  occupancyRate: number; 
+  avgLeadTimeDays?: number; 
 }
 
 export interface SeriesPoint { date: string; value: number; }

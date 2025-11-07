@@ -4,7 +4,7 @@
       <button routerLink="/pro" class="btn-ghost h-10">← Dashboard</button>
     </div>
 
-    <!-- Filtres -->
+
     <form [formGroup]="filters" (ngSubmit)="apply()" class="card p-6 flex flex-wrap gap-3 items-end">
       <div>
         <label class="text-xs">Date</label>
@@ -24,7 +24,7 @@
       <button class="btn-ghost h-10" type="button" (click)="clear()">Réinitialiser</button>
     </form>
 
-    <!-- À venir -->
+
     <div class="card p-6">
       <h3 class="font-semibold mb-3">À venir</h3>
       <div class="space-y-3">
@@ -39,26 +39,29 @@
                 <span class="badge mt-2" [ngClass]="r.badgeClass">{{ labelStatut(r.statut) }}</span>
               </div>
 
-              <!-- Actions contextuelles -->
+          
               <div class="flex gap-2 shrink-0">
-                <!-- Confirmer uniquement si EN_ATTENTE -->
+       
                 @if (r.statut === 'EN_ATTENTE') {
                   <button class="btn-ghost h-9" (click)="confirmer(r)">Confirmer</button>
                 }
 
-                <!-- Refuser (PRO) si non annulé/refusé -->
-                @if (r.statut !== 'ANNULE' && r.statut !== 'REFUSE') {
+
+                @if (r.statut === 'EN_ATTENTE') {
                   <button class="btn-ghost h-9 text-red-600" (click)="refuser(r)">Refuser</button>
                 }
+                @if (r.statut === 'CONFIRME') {
+                  <button class="btn-ghost h-9 text-red-600" (click)="annuler(r)">Annuler</button>
+                }
 
-                <!-- Modifier si non annulé/refusé -->
+             
                 @if (r.statut !== 'ANNULE' && r.statut !== 'REFUSE') {
                   <button class="btn-ghost h-9" (click)="toggleEdit(r)">Modifier</button>
                 }
               </div>
             </div>
 
-            <!-- Panneau édition -->
+   
             @if (editingId===r.id) {
               <form class="mt-3 grid sm:grid-cols-5 gap-3 items-end" (ngSubmit)="saveEdit(r)">
                 <div class="sm:col-span-2">
@@ -88,7 +91,7 @@
       </div>
     </div>
 
-    <!-- Passés (repliables) -->
+
     <div class="card p-6">
       <div class="flex items-center justify-between">
         <h3 class="font-semibold">Passés</h3>

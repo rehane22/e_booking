@@ -8,8 +8,8 @@ export type UserDetail = {
   nom: string;
   email: string;
   telephone?: string | null;
-  statut: string;           // 'ACTIF' | 'BLOQUE' ...
-  roles: string[];          // ['CLIENT', 'ADMIN', ...]
+  statut: string;        
+  roles: string[];         
 };
 
 export type UpdateUserPayload = {
